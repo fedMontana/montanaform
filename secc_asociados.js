@@ -49,14 +49,25 @@ function inicializarValoresAsociados() {
 
   lbAsociados.innerHTML = "Asociados [" + asociados.length + "]:";
   // Select de clubes para cuando el usuario está en modo edición:
-  generarOpcionesSelect("clubInput", losClubes);  
+  generarOpcionesSelect("clubInput", losClubes);
+  /* ¿Por qué no se usa 'generarOpcionesSelect' para rellenar los clubes en 'clubSelect'?
+      Porque la primera opción REQUERIDA en el <select> es "Todos los asociados", pues cuando
+      el usuario selecciona esta opción en el <select> vinculado llamado 'userSelect' se
+      mostraran TODOS LOS ASOCIADOS recibidos. */
   losClubes.forEach(club => {
     const option = document.createElement("option");
     option.value = club;
     option.textContent = club;
     clubSelect.appendChild(option);
   });
-  
+
+  /* El comboBox 'userSelect' de los asociados se le ingresan dos valores:
+      .value = curp  La CURP es única, con este valor diferenciamos al asociado seleccionado
+      .textcontent = Nombre mas apellido del asociado.
+    Ahora, a este comboBox se le actualizan estos valores en función
+    del ComboBox de los clubes.
+    Al momento de inicializar se rellenará este <select> con la información de
+    TODOS LOS ASOCIADOS. */
   asociados.forEach(usuario => {
     const option = document.createElement("option");
     option.value = usuario.CURP;
@@ -72,14 +83,27 @@ function inicializarValoresAsociados() {
      Si el cambio es un valor nuevo se deshabilitarán los cambios:  */
 function listenerDeCambiosAsociados() {
   document.querySelectorAll('.edit-field-asociados').forEach(field => {
-    field.addEventListener('input', (evento) => {      
-      const clave = field.id.toString().replace("Input", "");            
+    field.addEventListener('input', (evento) => {
+      /* Crítico -clave-:
+       Se está escuchando a las entradas y todos estos controles tienen el sufijo 'Input' en su id
+       así que se eliminará este sufijo para poder encontrar la clave en el objeto fieldMapping
+       por ejemplo se recibe la escucha de 'apellidoPaternoInput' y al eliminar el sufijo tenemos
+       'apellidoPaterno', y con esta clave se buscará en el objeto fieldMapping, el cual en el
+       campo jsonKey contiene 'Apellido Paterno', siendo este valor el acceso al apellido paterno
+       en el JSON recibido */
+      const clave = field.id.toString().replace("Input", "");
+      //console.log("El elemento HTML que el usuario modificó es: ", field.id);
+
+      //console.log("Probando type: ", evento.target.type);
       switch (field.id) {
         case 'disciplinasInput':
           // Nuevas actividades
           let actividadesSeleccionadas = leeDisciplinas();
           // Actividades originales.
-          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];          
+          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];
+          //console.log("Los valores previooos: ", actOrig);
+          // console.log("prueba salidaw: ", evento.target.value); (da como resultado el checkbox cliqueado)
+          //console.log("Actividades clickeadas: ", actividadesSeleccionadas);
 
           if (comparaArrays(actividadesSeleccionadas, actOrig)) {
             // Son iguales                        
@@ -107,8 +131,13 @@ function listenerDeCambiosAsociados() {
       }
       const valor = fieldMapping[clave].jsonKey;
       objCambios[field.id] = (field.value !== initialData[valor]);
-      console.log("Original: [", initialData[valor], "]  ingresado: [", field.value, "]", "  Resultado: ", (field.value !== initialData[valor]));      
-      field.style.borderColor = objCambios[field.id] ? '#ff9800' : '#ccc';      
+      console.log("Original: [", initialData[valor], "]  ingresado: [", field.value, "]", "  Resultado: ", (field.value !== initialData[valor]));
+      // condición ? expresiónSiVerdadero : expresiónSiFalso
+      // Cuando hay diferencia entre lo almacenado y editado equivale a un TRUE y cambia a  #ff9800
+      // por lo tanto si son iguales los valores, es FALSE y cambia a #ccc
+      field.style.borderColor = objCambios[field.id] ? '#ff9800' : '#ccc';
+      //console.log("Los cambios... ", JSON.stringify(objCambios));      
+      // Verificar si hay cambios pendientes
       const hayCambios = Object.values(objCambios).some(estado => estado);
       console.log("Resultado de los cambios: ", hayCambios);
     });
@@ -193,7 +222,16 @@ function losListenersAsociados() {
       userDetails.style.display = "block";
       idUsuario = selectedUser.ID; // Guardamos en global la ID
       laCURP = selectedUser.CURP;
-    } else {      
+      /* Agregamos la información a las "label" para visualizar */
+      //laID.textContent = "Ficha del asociado  " + selectedUser.ID;
+      //$("fichaID").textContent = "Ficha del asociado  " + selectedUser.ID;
+    } else {
+      // El usuario seleccionó en el <select> "Selecciona un asociado"
+      // de un asociado, lo cual lo vamos a interpretar
+      // como 
+      // Cuando el usuario selecciona en el comboBox de asociados la opción 
+      // se debe ocultar la ficha que está editando.
+      // acá se revisa si hay cambios.     
       console.log("Ocultando ficha....");
       ocultarFichaAsociados();
     }
@@ -267,8 +305,21 @@ function losListenersAsociados() {
       const val = JSON.stringify({ destino, elToken, elEstado, idUsuario, });
       btEliminarAso.innerHTML = "Espera un momento por favor...";
       deshabilitaBotonesAsociado();
-      enviarPOST(val);
-      //eliminnaPrueba01();
+      const resp = await enviarPOST(val);
+      if (resp.success) {
+        alert(resp.message);
+        // Filtramos el usuario a eliminar        
+        // Eliminamos solo al asociado en un array temporal
+        const usuarioAEliminar = asociados.filter(elBuscado => elBuscado["ID"] !== idUsuario);
+        asociados.length = 0; // Vaciamos el array original
+        asociados.push(...usuarioAEliminar);
+        // Forzamos un cambio en el <select>
+        clubSelect.value = "Todos los asociados";
+        clubSelect.dispatchEvent(new Event('change'));
+      }
+      btEliminarAso.innerHTML = "Eliminar ficha";
+      habilitaBotonesAsociado();
+      ocultarFichaAsociados();
     } else {
       console.log("Eliminación cancelada.");
     }
@@ -278,7 +329,8 @@ function losListenersAsociados() {
     Generar la credencial del asociado.
   */
   btGenCredencial.addEventListener("click", async () => {
-   const usuario = asociados.find(u => u.ID === idUsuario);
+    // Primero se pide confirmación.
+    const usuario = asociados.find(u => u.ID === idUsuario);
     const nombreCompleto = `${usuario.Nombre} ${usuario["Apellido Paterno"]}`;
     if (confirm(`¿Generar credencial para ${nombreCompleto} (ID: ${idUsuario})?`)) {
       const destino = "Credencial";
@@ -305,7 +357,7 @@ function losListenersAsociados() {
       }
       habilitaBotonesAsociado();
       btGenCredencial.innerHTML = "Generar credencial";
-    } 
+    }
   });
 
   /* 
@@ -341,10 +393,11 @@ function losListenersAsociados() {
         const destino = "EditarAsociado";
         const val = JSON.stringify({ destino, elToken, elEstado, datos });
         console.log(val);
+        btGuardarAsociados.innerHTML = "Espera un momento por favor...";
         deshabilitaBotonesAsociado();
         const resp = await enviarPOST(val);
         if (resp.success) {
-          console.log("Éxito en editar información del asociado.");
+          alert(resp.message);
           console.log("Valor ingresado: ", resp.respuestaA);
           // Despuésde que el cambio se haya aceptado en GAS procedemos a modificar aquellos
           // campos en el JSON principal
@@ -364,8 +417,12 @@ function losListenersAsociados() {
           }
           limpiaObjeAso();
         }
-      }
-      habilitaBotonesAsociado();
+        // Forzamos un cambio en el <select>        
+        btGuardarAsociados.innerHTML = "Guardar";
+        habilitaBotonesAsociado();
+        clubSelect.value = "Todos los asociados";
+        clubSelect.dispatchEvent(new Event('change'));
+      }      
     }
     else {
       mostrarToast("Nada que guardar.");
@@ -569,13 +626,8 @@ function revisaSubfuncion(funcion, valorSub) {
       sub.disabled = true;
       return;
   }
-  //console.log("Se llega acá solo cuando hay menú en las subfunciones.");
-  // Si no está deshabilitado el menú entonces se escribirá el valor
-  // correspondiente: 
+  
   generarOpcionesSelect("subfuncionInput", subMenu);
   if (valorSub !== "")
     sub.value = valorSub;
 }
-
-
-//mostrarToast("Por favor selecciona una imagen válida antes de enviar.");
