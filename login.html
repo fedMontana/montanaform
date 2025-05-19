@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login de Usuario</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    .login-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      text-align: center;
+    }
+
+    .login-container h1 {
+      margin-bottom: 20px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .login-container button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <h1>Iniciar Sesión</h1>
+    <input type="email" id="email" placeholder="Correo electrónico" required>
+    <input type="password" id="password" placeholder="Contraseña" required>
+    <button id="loginBtn">Ingresar</button>
+    <p id="message" style="color: red; display: none;">Error al iniciar sesión.</p>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // Eliminar un ítem específico
+      sessionStorage.removeItem('asociados');
+      sessionStorage.removeItem('sessionToken');
+      sessionStorage.removeItem('listaClubes');
+      sessionStorage.removeItem('losEventos');
+      sessionStorage.removeItem('laAsociacion');
+      sessionStorage.removeItem('elCorreo');
+      sessionStorage.removeItem('elEstado');
+      sessionStorage.removeItem('lasCompetencias');
+
+      console.log("Se ha eliminado la información de sesión anterior.....");
+
+    });
+
+    // Password:  o&CHuYPk
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const boton = document.getElementById('loginBtn');
+      boton.textContent = "Espere unos segundos por favor...";
+      boton.disabled = true; // Deshabilitar el botón
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const message = document.getElementById('message');
+      const destino = "login";
+      message.style.display = 'none';
+
+      if (!email || !password) {
+        message.textContent = 'Por favor completa los campos.';
+        message.style.display = 'block';
+        return;
+      }
+      //      
+      try {
+        const response = await fetch(URL_ACTIVA, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({ destino, email, password }) // JSON.stringify() toma un objeto de JavaScript y lo transforma en una cadena JSON.
+        });
+
+        const result = await response.json();
+        console.log("Resultado: ", result.success)
+        if (result.success) {
+          console.log('Login exitoso. ¡Bienvenido!');
+          // Guardar el token de sesión y la información del usuario          
+
+          //console.log("El mensaje: ", result.message);
+          //console.log("El estado de la república es: ", result.estadoRep);
+          // Redirigir a otra página con la información.          
+          // Guardamos toda la información recibida pero antes la          
+          // convertimos los objetos a string para poder ser almacenados
+          sessionStorage.setItem('asociados', JSON.stringify(result.data));
+          sessionStorage.setItem('sessionToken', JSON.stringify(result.token));
+          sessionStorage.setItem('listaClubes', JSON.stringify(result.clubes));
+          sessionStorage.setItem('losEventos', JSON.stringify(result.eventos));
+          sessionStorage.setItem('laAsociacion', JSON.stringify(result.asociacion));
+          sessionStorage.setItem('elCorreo', email);
+          sessionStorage.setItem('elEstado', result.estadoRep);
+          sessionStorage.setItem('lasCompetencias', JSON.stringify(result.competencias));
+          //sessionStorage.setItem('lasCompetencias', JSON.stringify(result.competencias));
+          //console.log("Datos recibidos: ", JSON.stringify(result.competencias));
+          window.location.href = 'postlogin.html'; // Redirige a otra página.
+        } else {          
+          message.textContent = result.message || 'Credenciales incorrectas.';
+          message.style.display = 'block';
+        }
+      } catch (error) {
+        message.textContent = 'Error en la conexión al servidor.';
+        message.style.display = 'block';
+        console.error('Error:', error);
+      }
+    });
+  </script>
+  <!-- <script src="const.js"></script> -->
+  <script src="../rutinas/utilidades.js"></script>
+</body>
+
+</html>

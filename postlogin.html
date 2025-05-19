@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Asociados y Eventos</title>
+  <style>
+    /* Estilo general */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      padding: 20px 0;
+      background-color: #007BFF;
+      margin: 0;
+    }
+
+    .menu {
+      display: flex;
+      justify-content: center;
+      margin: 25px 0;
+    }
+
+    .menu button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      color: white;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .menu button:hover {
+      background-color: #0056b3;
+    }
+
+    /* HAY CONFLICTO, REVISAR */
+    .content {
+      display: none;
+      margin: 10px auto;
+      /* Centramos horizontalmente */
+      padding: 5px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+      /* Ancho máximo para evitar que los campos excedan */
+      width: 95%;
+      /* Ajuste responsive */
+    }
+
+    .content.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    #userDetails {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      /* 160 px para la foto */
+      column-gap: 24px;
+    }
+
+    /* Contenedor de la foto */
+    .foto-asociado {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* El input de archivo ocupa todo el ancho de la foto */
+    #fotoInput {
+      margin-top: 8px;
+      width: 100%;
+      display: none;
+      /* igual que los demás campos editables */
+    }
+
+    #userDetails h3 {
+      text-align: center;
+      color: #007BFF;
+      margin-bottom: 10px;
+    }
+
+    /* Acá se visualiza Nombre y su txtbox en la misma línea*/
+    #userDetails div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    #userDetails label {
+      flex: 1;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    #userDetails span,
+    #userDetails select,
+    #userDetails input {
+      flex: 2;
+      font-size: 14px;
+    }
+
+    #userDetails input {
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      /* El color, es el color del borde */
+      border-radius: 5px;
+      display: none;
+    }
+
+    #userDetails select {
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: none;
+    }
+
+    /* Contenedor general de las disciplinas */
+    #disciplinasInput {
+      display: flex;
+      flex-wrap: wrap;
+      /* border: 1px solid #d43434;
+      border-radius: 5px; */
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      /* Ocupa todo el ancho del contenedor */
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      /* Asegura que padding no aumente el ancho total */
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    /* Ajustamos los botones para que cedan el ancho que el contenedor les dé */
+    .btnClic {
+      width: auto;
+      /* quita el 30 % fijo */
+      min-width: 140px;
+      /* o el que prefieras */
+      flex: 1 1 auto;
+      /* crecen y se encogen de forma pareja */
+      color: #fff;
+      /* A partir de acá solo los estilos*/
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      padding: 10px;
+      /* si quieres uniformar */
+      font-size: 16px;
+      transition: background .2s ease;
+      /* suaviza el hover */
+    }
+
+    .btnClic:hover {
+      background-color: #0056b3;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .laEliminacion {
+      background-color: #dc3545;
+    }
+
+    .laEliminacion:hover {
+      background-color: #b02a37;
+    }
+
+
+    button[type="submit"]:hover {
+      background-color: #218838;
+    }
+
+    /* Estilos para el fieldset */
+    fieldset {
+      width: 60%;
+      /* Ancho del recuadro */
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+
+    /* #previewCompEvento img {
+      max-height: 200px;
+      width: auto;
+      display: block;
+      margin-top: 10px;
+      object-fit: contain;
+    } */
+
+    .laPreviewComEvent img {
+      max-height: 200px;
+      width: auto;
+      display: block;
+      margin-top: 10px;
+      object-fit: contain;
+    }
+
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      max-width: 90%;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 12px;
+      position: fixed;
+      z-index: 9999;
+      left: 50%;
+      bottom: 30px;
+      font-size: 15px;
+      opacity: 0;
+      transition: opacity 0.5s ease, bottom 0.5s ease;
+    }
+
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+      bottom: 50px;
+    }
+
+    /* Móvil: foto centrada arriba */
+    @media(max-width:600px) {
+      #userDetails {
+        grid-template-columns: 1fr;
+        /* una sola columna */
+        row-gap: 16px;
+        justify-items: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Gestión de Asociados y Eventos</h1>
+
+  <!-- Menú de opciones -->
+  <div class="menu">
+    <button id="btnAsociados" onclick="showContent('usuarios')">Asociados</button>
+    <button id="btnClubes" onclick="showContent('clubes')">Clubes</button>
+    <button id="btnEventos" onclick="showContent('eventos')">Eventos</button>
+    <button id="btnCompetencia" onclick="showContent('divCompetencias')">Competencias</button>
+  </div>
+  <!-- class="content" --- con esta clase se selecciona el elemento activo -->
+  <!-- Sección de usuarios -->
+  <div id="usuarios" class="content">
+    <h2>Gestión de Asociados</h2>
+    <label for="clubSelect">Selección de clubes:</label>
+    <select id="clubSelect">
+      <option value="Todos los asociados">Todos los asociados</option>
+    </select>
+
+    <label id="indicadorAsociados" for="userSelect">Asociados:</label>
+    <select id="userSelect">
+      <option value="">Selecciona un asociado</option>
+    </select>
+
+    <!-- Ficha del asociado -->
+    <div id="userDetails" style="display: none;">
+      <h3 id="fichaID">Ficha del Asociado</h3>
+
+      <!-- <input type="file" id="comprobanteSeguro" accept="image/jpeg,image/png">
+      <div id="previewSeguro"></div> -->
+
+      <!-- Dentro de #userDetails (arriba del primer <div>) -->
+      <input id="fotoInput" class="edit-field-asociados" type="file" accept="image/jpeg,image/png">
+      <div id="previewImgAsociado" class="foto-asociado">       
+      </div>
+
+      <div>
+        <label>Nombre:</label>
+        <span id="nombre"></span>
+        <input class="edit-field-asociados" id="nombreInput" type="text">
+      </div>
+
+      <div>
+        <label>Apellido paterno:</label>
+        <span id="apellidoPaterno"></span>
+        <input class="edit-field-asociados" id="apellidoPaternoInput" type="text">
+      </div>
+
+      <div>
+        <label>Apellido materno:</label>
+        <span id="apellidoMaterno"></span>
+        <input class="edit-field-asociados" id="apellidoMaternoInput" type="text">
+      </div>
+
+      <div>
+        <label>Fecha de nacimiento:</label>
+        <span id="fechaNacimiento"></span>
+        <!-- <input id="fechaNacimientoInput" type="text"> -->
+        <input class="edit-field-asociados" type="date" id="fechaNacimientoInput" name="fechaNacimiento" required>
+      </div>
+
+      <div>
+        <label>Teléfono:</label>
+        <span id="telefono"></span>
+        <input class="edit-field-asociados" id="telefonoInput" type="text">
+      </div>
+
+      <div>
+        <label>e-mail:</label>
+        <span id="email"></span>
+        <input class="edit-field-asociados" id="emailInput" type="text">
+      </div>
+
+      <div>
+        <label>CURP:</label>
+        <span id="curp"></span>
+        <input class="edit-field-asociados" id="curpInput" type="text">
+      </div>
+
+      <div>
+        <label>Género:</label>
+        <span id="genero"></span>
+        <select class="edit-field-asociados" class="edit-field-asociados" id="generoInput">
+          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </select>
+      </div>
+
+      <div>
+        <label>Escolaridad:</label>
+        <span id="escolaridad"></span>
+        <select class="edit-field-asociados" id="escolaridadInput">
+          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </select>
+      </div>
+
+      <div>
+        <label>Estado:</label>
+        <span id="estado"></span>
+        <select class="edit-field-asociados" id="estadoInput">
+          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </select>
+      </div>
+
+      <div>
+        <label>Municipio:</label>
+        <span id="municipio"></span>
+        <input class="edit-field-asociados" id="municipioInput" type="text">
+      </div>
+
+      <div>
+        <label>Colonia:</label>
+        <span id="colonia"></span>
+        <input class="edit-field-asociados" id="coloniaInput" type="text">
+      </div>
+
+      <div>
+        <label>Calle y número:</label>
+        <span id="calleNum"></span>
+        <input class="edit-field-asociados" id="calleNumInput" type="text">
+      </div>
+
+      <div>
+        <label>Código postal:</label>
+        <span id="zip"></span>
+        <input class="edit-field-asociados" id="zipInput" type="text">
+      </div>
+
+      <div>
+        <label>Contacto de emergencia:</label>
+        <span id="contEmergencia"></span>
+        <input class="edit-field-asociados" id="contEmergenciaInput" type="text">
+      </div>
+
+      <div>
+        <label>Teléfono de emergencia:</label>
+        <span id="telEmergencia"></span>
+        <input class="edit-field-asociados" id="telEmergenciaInput" type="text">
+      </div>
+
+      <div>
+        <label>Enfermedades:</label>
+        <span id="enfermedades"></span>
+        <input class="edit-field-asociados" id="enfermedadesInput" type="text">
+      </div>
+
+      <div>
+        <label>Alergias:</label>
+        <span id="alergias"></span>
+        <input class="edit-field-asociados" id="alergiasInput" type="text">
+      </div>
+
+      <div>
+        <label>Tipo de sangre:</label>
+        <span id="tipoSangre"></span>
+        <select class="edit-field-asociados" id="tipoSangreInput">
+          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </select>
+      </div>
+
+      <!-- Club -->
+      <div>
+        <label>Club:</label>
+        <span id="club"></span>
+        <select class="edit-field-asociados" id="clubInput">
+          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </select>
+      </div>
+
+      <div>
+        <label>Disciplinas:</label>
+        <span id="disciplinas"></span>
+        <fieldset style="display: none;">
+          <div id="disciplinasInput" class="edit-field-asociados">
+            <!-- Los checkboxes se generarán aquí dinámicamente -->
+          </div>
+        </fieldset>
+      </div>
+
+      <div>
+        <label>Función:</label>
+        <span id="funcion"></span>
+        <select class="edit-field-asociados" id="funcionInput">
+          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </select>
+      </div>
+
+      <div>
+        <label>Subfunción:</label>
+        <span id="subfuncion"></span>
+        <select class="edit-field-asociados" id="subfuncionInput">
+          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </select>
+      </div>
+
+      <br>
+      <br>
+
+      <!-- Aquí puedes seguir con los demás campos -->
+      <div class="action-buttons">
+        <button class="btnClic" id="editButton">Editar</button>
+        <button class="btnClic" id="credencialButton">Generar credencial</button>
+        <button class="btnClic" id="btnGuardarAsociados" style="display: none;">Guardar</button>
+        <button class="btnClic" id="restaurarValAsociadosBtn" style="display: none;">Restaurar</button>
+        <button class="btnClic laEliminacion" id="eliminarAsociadoBtn">Eliminar ficha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de Clubes -->
+  <div id="clubes" class="content">
+    <h2>Gestión de Clubes</h2>
+
+    <label for="clubesSelect">Selecciona un club:</label>
+    <select id="clubesSelect">
+      <option value="">Selecciona un club</option>
+    </select>
+
+    <div id="clubForm" style="display:none; margin-top:20px;">
+      <label for="clubNombreInput">Nombre del club:</label>
+      <input type="text" id="clubNombreInput">
+
+      <div class="action-buttons">
+        <button class="btnClic" id="guardarClubBtn">Guardar cambios</button>
+        <button class="btnClic" id="eliminarClubBtn">Eliminar club</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <h3>Agregar nuevo club</h3>
+    <label for="nuevoClubInput">Nombre del nuevo club:</label>
+    <input type="text" id="nuevoClubInput">
+    <button class="btnClic" id="agregarClubBtn">Agregar club</button>
+  </div>
+
+  <!-- Sección de eventos -->
+  <div id="eventos" class="content">
+    <h2>Generar un evento</h2>
+    <label for="eventosSelect">Selección de eventos:</label>
+    <select id="eventosSelect">
+
+    </select>
+    <!-- Ficha del evento -->
+    <div id="eventosDetails" style="display: none;">
+      <h3 id="fichaEvento">Eventos</h3>
+
+      <div>
+        <label for="eventPoster">Cartel (foto del evento):</label>        
+        <input class="edit-field-evento" id="fotoEventoInput" type="file" accept="image/jpeg,image/png">
+        <div class="laPreviewComEvent" id="previewCompEvento"></div>
+      </div>
+
+      <label for="eventName">Nombre del evento:</label>
+      <input class="edit-field-evento" type="text" id="eventName" name="eventName" required>
+
+      <label for="eventStart">Fecha de inicio:</label>
+      <input class="edit-field-evento" type="date" id="eventStart" name="eventStart" required>
+
+      <label for="eventEnd">Fecha de finalización:</label>
+      <input class="edit-field-evento" type="date" id="eventEnd" name="eventEnd" required>
+
+      <label for="eventDuration">Duración:</label>
+      <input class="edit-field-evento" type="text" id="eventDuration" name="eventDuration" required>
+
+      <label for="eventLocation">Lugar del evento:</label>
+      <input class="edit-field-evento" type="text" id="eventLocation" name="eventLocation" required>
+
+      <label for="eventFee">Cuota de recuperación:</label>
+      <input class="edit-field-evento" type="text" id="eventFee" name="eventFee" required>
+
+      <label for="registrationDeadline">Fecha límite de inscripción:</label>
+      <input class="edit-field-evento" type="date" id="registrationDeadline" name="registrationDeadline" required>
+
+      <label for="depositInfo">Datos para el depósito:</label>
+      <textarea class="edit-field-evento" id="depositInfo" name="depositInfo"></textarea>
+
+      <h3>Informes</h3>
+      <label for="contactPhone">Celular:</label>
+      <input class="edit-field-evento" type="text" id="contactPhone" name="contactPhone"
+        placeholder="Teléfono a 10 dígitos" pattern="\d{10}" maxlength="10"
+        title="Debe contener exactamente 10 dígitos numéricos" required>
+
+      <label for="contactEmail">Correo:</label>
+      <input class="edit-field-evento" type="email" id="contactEmail" name="contactEmail" required>
+
+      <label for="contactLink">Link página web:</label>
+      <input class="edit-field-evento" type="url" id="contactLink" name="contactLink" required>
+
+      <div class="action-buttons">
+        <button class="btnClic" id="salvarEvento">Guardar</button>
+        <button class="btnClic laEliminacion" id="eliminarEvento" style="display: none;">Eiminar</button>
+      </div>
+    </div>
+  </div>
+  <!-- FIN de sección EVENTOS -->
+
+  <!-- Sección de competencias -->
+  <div id="divCompetencias" class="content">
+    <h2>Generar una competencia</h2>
+    <label for="competenciasSelect">Selección de competencias:</label>
+    <select id="competenciasSelect">
+    </select>
+
+    <!-- Ficha de la competencia -->
+    <div id="competenciasDetails" style="display: none;">
+      <h3 id="fichaCompetencia">Competencias</h3>
+
+      <div>
+        <label for="competenciaImg">Cartel (foto de la competencia):</label>        
+        <input class="edit-field-evento" id="fotoCompetenciaInput" type="file" accept="image/jpeg,image/png">
+        <div class="laPreviewComEvent"  id="previewCompetencia"></div>
+      </div>
+
+      <label for="competenciaName">Nombre de la competencia:</label>
+      <input type="text" id="competenciaName" name="competenciaName" required>
+
+      <label for="competenciaLugar">Lugar de la competencia:</label>
+      <input type="text" id="competenciaLugar" name="competenciaLugar" required>
+
+      <label for="competenciStart">Fecha de inicio:</label>
+      <input type="date" id="competenciStart" name="competenciStart" required>
+
+      <label for="competenciaRama">Rama:</label>
+      <input type="text" id="competenciaRama" name="competenciaRama" required>
+
+      <label for="competenciaCategoria">Categoría:</label>
+      <input type="text" id="competenciaCategoria" name="competenciaCategoria" required>
+
+      <label for="competenciaSubcategoria">Subcategoría:</label>
+      <input type="text" id="competenciaSubcategoria" name="competenciaSubcategoria" required>
+
+      <label for="competenciaCosto">Costo:</label>
+      <input type="text" id="competenciaCosto" name="competenciaCosto" required>
+
+      <label for="competenciaDDeposito">Datos para depositar:</label>
+      <input type="text" id="competenciaDDeposito" name="competenciaDDeposito" required>
+
+      <label for="competenciaCelular">Celular:</label>      
+      <input type="text" id="competenciaCelular" name="competenciaCelular"
+        placeholder="Teléfono a 10 dígitos" pattern="\d{10}" maxlength="10"
+        title="Debe contener exactamente 10 dígitos numéricos" required>
+
+
+      <label for="competenciaCorreo">Correo:</label>
+      <input type="text" id="competenciaCorreo" name="competenciaCorreo" required>
+
+      <label for="competenciaWeb">Página web:</label>
+      <input type="text" id="competenciaWeb" name="competenciaWeb" required>
+
+      <div class="action-buttons">
+        <button class="btnClic" id="salvarCompetencia">Guardar</button>
+        <button class="btnClic laEliminacion" id="eliminarCompetencia" style="display: none;">Eiminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="../rutinas/utilidades.js"></script>
+  <script src="postlogin.js"></script>
+  <script src="secc_clubes.js"></script>
+  <script src="secc_asociados.js"></script>
+  <script src="secc_eventos.js"></script>
+  <script src="secc_comp.js"></script>  
+</body>
+
+</html>
