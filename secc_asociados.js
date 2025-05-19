@@ -49,25 +49,14 @@ function inicializarValoresAsociados() {
 
   lbAsociados.innerHTML = "Asociados [" + asociados.length + "]:";
   // Select de clubes para cuando el usuario está en modo edición:
-  generarOpcionesSelect("clubInput", losClubes);
-  /* ¿Por qué no se usa 'generarOpcionesSelect' para rellenar los clubes en 'clubSelect'?
-      Porque la primera opción REQUERIDA en el <select> es "Todos los asociados", pues cuando
-      el usuario selecciona esta opción en el <select> vinculado llamado 'userSelect' se
-      mostraran TODOS LOS ASOCIADOS recibidos. */
+  generarOpcionesSelect("clubInput", losClubes);  
   losClubes.forEach(club => {
     const option = document.createElement("option");
     option.value = club;
     option.textContent = club;
     clubSelect.appendChild(option);
   });
-
-  /* El comboBox 'userSelect' de los asociados se le ingresan dos valores:
-      .value = curp  La CURP es única, con este valor diferenciamos al asociado seleccionado
-      .textcontent = Nombre mas apellido del asociado.
-    Ahora, a este comboBox se le actualizan estos valores en función
-    del ComboBox de los clubes.
-    Al momento de inicializar se rellenará este <select> con la información de
-    TODOS LOS ASOCIADOS. */
+  
   asociados.forEach(usuario => {
     const option = document.createElement("option");
     option.value = usuario.CURP;
@@ -83,27 +72,14 @@ function inicializarValoresAsociados() {
      Si el cambio es un valor nuevo se deshabilitarán los cambios:  */
 function listenerDeCambiosAsociados() {
   document.querySelectorAll('.edit-field-asociados').forEach(field => {
-    field.addEventListener('input', (evento) => {
-      /* Crítico -clave-:
-       Se está escuchando a las entradas y todos estos controles tienen el sufijo 'Input' en su id
-       así que se eliminará este sufijo para poder encontrar la clave en el objeto fieldMapping
-       por ejemplo se recibe la escucha de 'apellidoPaternoInput' y al eliminar el sufijo tenemos
-       'apellidoPaterno', y con esta clave se buscará en el objeto fieldMapping, el cual en el
-       campo jsonKey contiene 'Apellido Paterno', siendo este valor el acceso al apellido paterno
-       en el JSON recibido */
-      const clave = field.id.toString().replace("Input", "");
-      //console.log("El elemento HTML que el usuario modificó es: ", field.id);
-
-      //console.log("Probando type: ", evento.target.type);
+    field.addEventListener('input', (evento) => {      
+      const clave = field.id.toString().replace("Input", "");            
       switch (field.id) {
         case 'disciplinasInput':
           // Nuevas actividades
           let actividadesSeleccionadas = leeDisciplinas();
           // Actividades originales.
-          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];
-          //console.log("Los valores previooos: ", actOrig);
-          // console.log("prueba salidaw: ", evento.target.value); (da como resultado el checkbox cliqueado)
-          //console.log("Actividades clickeadas: ", actividadesSeleccionadas);
+          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];          
 
           if (comparaArrays(actividadesSeleccionadas, actOrig)) {
             // Son iguales                        
@@ -131,13 +107,8 @@ function listenerDeCambiosAsociados() {
       }
       const valor = fieldMapping[clave].jsonKey;
       objCambios[field.id] = (field.value !== initialData[valor]);
-      console.log("Original: [", initialData[valor], "]  ingresado: [", field.value, "]", "  Resultado: ", (field.value !== initialData[valor]));
-      // condición ? expresiónSiVerdadero : expresiónSiFalso
-      // Cuando hay diferencia entre lo almacenado y editado equivale a un TRUE y cambia a  #ff9800
-      // por lo tanto si son iguales los valores, es FALSE y cambia a #ccc
-      field.style.borderColor = objCambios[field.id] ? '#ff9800' : '#ccc';
-      //console.log("Los cambios... ", JSON.stringify(objCambios));      
-      // Verificar si hay cambios pendientes
+      console.log("Original: [", initialData[valor], "]  ingresado: [", field.value, "]", "  Resultado: ", (field.value !== initialData[valor]));      
+      field.style.borderColor = objCambios[field.id] ? '#ff9800' : '#ccc';      
       const hayCambios = Object.values(objCambios).some(estado => estado);
       console.log("Resultado de los cambios: ", hayCambios);
     });
@@ -222,16 +193,7 @@ function losListenersAsociados() {
       userDetails.style.display = "block";
       idUsuario = selectedUser.ID; // Guardamos en global la ID
       laCURP = selectedUser.CURP;
-      /* Agregamos la información a las "label" para visualizar */
-      //laID.textContent = "Ficha del asociado  " + selectedUser.ID;
-      //$("fichaID").textContent = "Ficha del asociado  " + selectedUser.ID;
-    } else {
-      // El usuario seleccionó en el <select> "Selecciona un asociado"
-      // de un asociado, lo cual lo vamos a interpretar
-      // como 
-      // Cuando el usuario selecciona en el comboBox de asociados la opción 
-      // se debe ocultar la ficha que está editando.
-      // acá se revisa si hay cambios.     
+    } else {      
       console.log("Ocultando ficha....");
       ocultarFichaAsociados();
     }
@@ -316,28 +278,34 @@ function losListenersAsociados() {
     Generar la credencial del asociado.
   */
   btGenCredencial.addEventListener("click", async () => {
-    const usuario = asociados.find(u => u.ID === idUsuario);
-    const destino = "Credencial";
-    let datos = {};
-    datos["ID"] = idUsuario;
-    datos["CURP"] = usuario["CURP"];
-    datos["Nombre"] = usuario.Nombre;
-    datos["Apellido Paterno"] = usuario["Apellido Paterno"];
-    datos["Apellido Materno"] = usuario["Apellido Materno"];
-    datos["Alergias"] = usuario["Alergias"];
-    datos["Enfermedades"] = usuario["Enfermedades"];
-    datos["Tipo de sangre"] = usuario["Tipo de sangre"];
-    datos["Foto"] = usuario["Foto"];
-    datos["EstadoAsociacion"] = elEstado;
-    datos["correo"] = elCorreo;
-    console.log(datos);
-    const val = JSON.stringify({ destino, datos });
-    console.log(val);
-    //deshabilitaBotonesAsociado();
-    const resp = await enviarPOST(val);
-    if (resp.success) {
-      console.log("¡Excelente!");
-    }
+   const usuario = asociados.find(u => u.ID === idUsuario);
+    const nombreCompleto = `${usuario.Nombre} ${usuario["Apellido Paterno"]}`;
+    if (confirm(`¿Generar credencial para ${nombreCompleto} (ID: ${idUsuario})?`)) {
+      const destino = "Credencial";
+      let datos = {};
+      datos["ID"] = idUsuario;
+      datos["CURP"] = usuario["CURP"];
+      datos["Nombre"] = usuario.Nombre;
+      datos["Apellido Paterno"] = usuario["Apellido Paterno"];
+      datos["Apellido Materno"] = usuario["Apellido Materno"];
+      datos["Alergias"] = usuario["Alergias"];
+      datos["Enfermedades"] = usuario["Enfermedades"];
+      datos["Tipo de sangre"] = usuario["Tipo de sangre"];
+      datos["Foto"] = usuario["Foto"];
+      datos["EstadoAsociacion"] = elEstado;
+      datos["correo"] = elCorreo;
+      console.log(datos);
+      const val = JSON.stringify({ destino, datos });
+      console.log(val);
+      btGenCredencial.innerHTML = "Espera un momento...";
+      deshabilitaBotonesAsociado();
+      const resp = await enviarPOST(val);
+      if (resp.success) {
+        alert(resp.message);
+      }
+      habilitaBotonesAsociado();
+      btGenCredencial.innerHTML = "Generar credencial";
+    } 
   });
 
   /* 
