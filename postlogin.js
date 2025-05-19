@@ -209,44 +209,14 @@ async function enviarPOST(jsonData) {
     });
     const result = await response.json();
     console.log(JSON.stringify(result));
-    if (result.success) {
-      return result;
-
-      // switch (result.message2) {
-      //   case 'EliminarAsociado':
-      //     // Respuesta exitosa, se procede a eliminar referencias al usuario eliminado
-      //     // También regresará           
-      //     eliminnaPrueba01();
-
-      //     break;
-      // }
-    } else {
+    if (!result.success) {
       console.log("Respuesta de error recibida del servidor: ", result.message);
       alert(result.message);
-    }
+    } 
+    // 
+    return result;
   } catch (error) {
     console.log("Error en la conexión al servidor...");
     console.error('Error:', error);
   }
-}
-
-
-function eliminnaPrueba01() {
-  // Procedemos a eliminar del JSON el usuario
-  asociados = asociados.filter(u => u.ID !== idUsuarioEliminado); // 263
-  // Ahora se eliminará del <select> de 'userSelect'
-  const v = $('userSelect');
-  Array.from(userSelect.options).forEach(option => {
-    if (option.value === idUsuarioEliminado) {
-      console.log("Se ha encontrado el asociado a eliminar en el <select>");
-      option.remove();
-    }
-  })
-  console.log("Los ", asociados);
-  console.log(`Usuario ${idUsuarioEliminado} eliminado.`);
-  const bt4 = $('eliminarAsociadoBtn');
-  bt4.innerHTML = "Eliminar ficha";
-  habilitaBotonesAsociado();
-  ocultarFichaAsociados();
-  // falta regresar el <select> a su estado original
 }
