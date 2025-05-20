@@ -77,20 +77,15 @@
     .card .contacto strong {
       display: inline-block;
       min-width: 90px;
-      color: #89d0ff;
-      /* Color de letra para Tel., Email, Web*/
+      color: #89d0ff;      
     }
 
     .card .contacto a {
       color: #ffffff;
-      /* texto blanco */
-      /* text-decoration: underline; */
-      /* opcional: para que parezca enlace */
     }
 
     .card .contacto a:hover {
-      color: #00bfff;
-      /* color de acento al pasar el mouse */
+      color: #00bfff;      
     }
 
      .close {
@@ -104,8 +99,6 @@
     .close:hover {
       color: #fff;
     }
-
-    
 
     .form-inline {
       background: #1b1b2a;
@@ -277,44 +270,14 @@
 
   <div class="container">
     <h1>Eventos y Competencias</h1>
-    <!-- Contenedor:   eventos -->
+
     <h2 style="color:#00bfff;">Eventos</h2>
     <div id="eventos" class="cards-grid"></div>
 
-    <!-- Contenedor:   competancias -->
     <h2 style="color:#00bfff;">Competencias</h2>
     <div id="competencias" class="cards-grid"></div>
 
-    <h2 style="color:#00bfff; margin-top:40px;">Contratación de seguro médico</h2>
-    <div id="seguroMedico" class="cards-grid">
-      <div class="card" style="max-width:500px; margin:auto;">
-        <form id="formularioSeguro">
-          <label for="nombreSeguro">Nombre del asociado:</label>
-          <input type="text" id="nombreSeguro" required>
-
-          <label for="idSeguro">ID o CURP:</label>
-          <input type="text" id="idSeguro" required>
-
-          <label for="emailSeguro">Correo electrónico:</label>
-          <input type="email" id="emailSeguro" required>
-
-          <label for="comprobanteSeguro">Comprobante de pago:</label>
-          <input type="file" id="comprobanteSeguro" accept="image/jpeg,image/png">
-          <div id="previewSeguro"></div>
-
-          <div id="spinnerSeguro" style="display:none; text-align:center; margin-top:10px;">
-            <div class="spinner mini"></div>
-            <p>Enviando comprobante...</p>
-          </div>
-
-          <button type="submit" id="enviarSeguro">Enviar comprobante</button>
-          <br>
-        </form>
-      </div>
-    </div>
   </div>
-
-  
 
   <div id="toast" class="toast"></div>
   <script src="utilidades.js"></script>
