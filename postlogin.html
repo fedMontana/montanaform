@@ -82,8 +82,7 @@
       flex-direction: column;
       align-items: center;
     }
-
-    /* El input de archivo ocupa todo el ancho de la foto */
+    
     #fotoInput {
       margin-top: 8px;
       width: 100%;
@@ -134,27 +133,22 @@
       border-radius: 5px;
       display: none;
     }
-
-    /* Contenedor general de las disciplinas */
+    
     #disciplinasInput {
       display: flex;
-      flex-wrap: wrap;
-      /* border: 1px solid #d43434;
-      border-radius: 5px; */
+      flex-wrap: wrap;      
     }
 
     input,
     textarea,
     select {
-      width: 100%;
-      /* Ocupa todo el ancho del contenedor */
+      width: 100%;      
       padding: 10px;
       margin: 10px 0;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 5px;
-      box-sizing: border-box;
-      /* Asegura que padding no aumente el ancho total */
+      box-sizing: border-box;      
     }
 
     .action-buttons {
@@ -164,25 +158,20 @@
       margin-top: 20px;
     }
 
-    /* Ajustamos los botones para que cedan el ancho que el contenedor les dé */
+
     .btnClic {
-      width: auto;
-      /* quita el 30 % fijo */
-      min-width: 140px;
-      /* o el que prefieras */
-      flex: 1 1 auto;
-      /* crecen y se encogen de forma pareja */
-      color: #fff;
-      /* A partir de acá solo los estilos*/
+      width: auto;      
+      min-width: 140px;      
+      flex: 1 1 auto;      
+      color: #fff;      
       background-color: #007BFF;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      padding: 10px;
-      /* si quieres uniformar */
+      padding: 10px;      
       font-size: 16px;
       transition: background .2s ease;
-      /* suaviza el hover */
+      
     }
 
     .btnClic:hover {
@@ -213,15 +202,7 @@
       padding: 20px;
       border: 2px solid #ccc;
       border-radius: 10px;
-    }
-
-    /* #previewCompEvento img {
-      max-height: 200px;
-      width: auto;
-      display: block;
-      margin-top: 10px;
-      object-fit: contain;
-    } */
+    }    
 
     .laPreviewComEvent img {
       max-height: 200px;
@@ -270,16 +251,14 @@
 
 <body>
   <h1>Gestión de Asociados y Eventos</h1>
-
-  <!-- Menú de opciones -->
+  
   <div class="menu">
     <button id="btnAsociados" onclick="showContent('usuarios')">Asociados</button>
     <button id="btnClubes" onclick="showContent('clubes')">Clubes</button>
     <button id="btnEventos" onclick="showContent('eventos')">Eventos</button>
     <button id="btnCompetencia" onclick="showContent('divCompetencias')">Competencias</button>
   </div>
-  <!-- class="content" --- con esta clase se selecciona el elemento activo -->
-  <!-- Sección de usuarios -->
+
   <div id="usuarios" class="content">
     <h2>Gestión de Asociados</h2>
     <label for="clubSelect">Selección de clubes:</label>
@@ -292,16 +271,11 @@
       <option value="">Selecciona un asociado</option>
     </select>
 
-    <!-- Ficha del asociado -->
     <div id="userDetails" style="display: none;">
       <h3 id="fichaID">Ficha del Asociado</h3>
 
-      <!-- <input type="file" id="comprobanteSeguro" accept="image/jpeg,image/png">
-      <div id="previewSeguro"></div> -->
-
-      <!-- Dentro de #userDetails (arriba del primer <div>) -->
       <input id="fotoInput" class="edit-field-asociados" type="file" accept="image/jpeg,image/png">
-      <div id="previewImgAsociado" class="foto-asociado">       
+      <div id="previewImgAsociado" class="foto-asociado">
       </div>
 
       <div>
@@ -324,8 +298,7 @@
 
       <div>
         <label>Fecha de nacimiento:</label>
-        <span id="fechaNacimiento"></span>
-        <!-- <input id="fechaNacimientoInput" type="text"> -->
+        <span id="fechaNacimiento"></span>        
         <input class="edit-field-asociados" type="date" id="fechaNacimientoInput" name="fechaNacimiento" required>
       </div>
 
@@ -350,8 +323,8 @@
       <div>
         <label>Género:</label>
         <span id="genero"></span>
-        <select class="edit-field-asociados" class="edit-field-asociados" id="generoInput">
-          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        <select class="edit-field-asociados" id="generoInput">
+          
         </select>
       </div>
 
@@ -359,7 +332,7 @@
         <label>Escolaridad:</label>
         <span id="escolaridad"></span>
         <select class="edit-field-asociados" id="escolaridadInput">
-          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+          
         </select>
       </div>
 
@@ -367,7 +340,7 @@
         <label>Estado:</label>
         <span id="estado"></span>
         <select class="edit-field-asociados" id="estadoInput">
-          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+          
         </select>
       </div>
 
@@ -423,16 +396,15 @@
         <label>Tipo de sangre:</label>
         <span id="tipoSangre"></span>
         <select class="edit-field-asociados" id="tipoSangreInput">
-          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+          
         </select>
       </div>
-
-      <!-- Club -->
+      
       <div>
         <label>Club:</label>
         <span id="club"></span>
         <select class="edit-field-asociados" id="clubInput">
-          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+          
         </select>
       </div>
 
@@ -441,7 +413,7 @@
         <span id="disciplinas"></span>
         <fieldset style="display: none;">
           <div id="disciplinasInput" class="edit-field-asociados">
-            <!-- Los checkboxes se generarán aquí dinámicamente -->
+            
           </div>
         </fieldset>
       </div>
@@ -449,8 +421,7 @@
       <div>
         <label>Función:</label>
         <span id="funcion"></span>
-        <select class="edit-field-asociados" id="funcionInput">
-          <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        <select class="edit-field-asociados" id="funcionInput">          
         </select>
       </div>
 
@@ -458,14 +429,12 @@
         <label>Subfunción:</label>
         <span id="subfuncion"></span>
         <select class="edit-field-asociados" id="subfuncionInput">
-          <!-- Las opciones se generarán dinámicamente con JavaScript -->
         </select>
       </div>
 
       <br>
       <br>
 
-      <!-- Aquí puedes seguir con los demás campos -->
       <div class="action-buttons">
         <button class="btnClic" id="editButton">Editar</button>
         <button class="btnClic" id="credencialButton">Generar credencial</button>
@@ -476,7 +445,6 @@
     </div>
   </div>
 
-  <!-- Sección de Clubes -->
   <div id="clubes" class="content">
     <h2>Gestión de Clubes</h2>
 
@@ -494,7 +462,6 @@
         <button class="btnClic" id="eliminarClubBtn">Eliminar club</button>
       </div>
     </div>
-
     <hr>
 
     <h3>Agregar nuevo club</h3>
@@ -502,20 +469,18 @@
     <input type="text" id="nuevoClubInput">
     <button class="btnClic" id="agregarClubBtn">Agregar club</button>
   </div>
-
-  <!-- Sección de eventos -->
+  
   <div id="eventos" class="content">
     <h2>Generar un evento</h2>
     <label for="eventosSelect">Selección de eventos:</label>
     <select id="eventosSelect">
 
-    </select>
-    <!-- Ficha del evento -->
+    </select>    
     <div id="eventosDetails" style="display: none;">
       <h3 id="fichaEvento">Eventos</h3>
 
       <div>
-        <label for="eventPoster">Cartel (foto del evento):</label>        
+        <label for="eventPoster">Cartel (foto del evento):</label>
         <input class="edit-field-evento" id="fotoEventoInput" type="file" accept="image/jpeg,image/png">
         <div class="laPreviewComEvent" id="previewCompEvento"></div>
       </div>
@@ -562,60 +527,81 @@
       </div>
     </div>
   </div>
-  <!-- FIN de sección EVENTOS -->
 
-  <!-- Sección de competencias -->
   <div id="divCompetencias" class="content">
     <h2>Generar una competencia</h2>
     <label for="competenciasSelect">Selección de competencias:</label>
     <select id="competenciasSelect">
     </select>
 
-    <!-- Ficha de la competencia -->
     <div id="competenciasDetails" style="display: none;">
       <h3 id="fichaCompetencia">Competencias</h3>
 
       <div>
-        <label for="competenciaImg">Cartel (foto de la competencia):</label>        
-        <input class="edit-field-evento" id="fotoCompetenciaInput" type="file" accept="image/jpeg,image/png">
-        <div class="laPreviewComEvent"  id="previewCompetencia"></div>
+        <label for="competenciaImg">Cartel (foto de la competencia):</label>
+        <input id="fotoCompetenciaInput" type="file" accept="image/jpeg,image/png">
+        <div class="laPreviewComEvent" id="previewCompetencia"></div>
       </div>
 
       <label for="competenciaName">Nombre de la competencia:</label>
-      <input type="text" id="competenciaName" name="competenciaName" required>
+      <input class="edit-field-competencias" type="text" id="competenciaName" name="competenciaName" required>
 
       <label for="competenciaLugar">Lugar de la competencia:</label>
-      <input type="text" id="competenciaLugar" name="competenciaLugar" required>
+      <input class="edit-field-competencias" type="text" id="competenciaLugar" name="competenciaLugar" required>
 
       <label for="competenciStart">Fecha de inicio:</label>
-      <input type="date" id="competenciStart" name="competenciStart" required>
+      <input class="edit-field-competencias" type="date" id="competenciStart" name="competenciStart" required>
+        
+      <div>
+        <label>Rama</label>
+        <br>
+        <span id="competenciaRama"></span>
+        <fieldset>
+          <div id="competenciaRamaInput" class="edit-field-competencias">
+            
+          </div>
+        </fieldset>
+      </div>
 
-      <label for="competenciaRama">Rama:</label>
-      <input type="text" id="competenciaRama" name="competenciaRama" required>
+      <div>
+        <label>Categoría</label>
+        <br>
+        <span id="compCategoria"></span>
+        <fieldset>
+          <div id="compCategoriaInput" class="edit-field-competencias">
+            
+          </div>
+        </fieldset>
+      </div>
 
-      <label for="competenciaCategoria">Categoría:</label>
-      <input type="text" id="competenciaCategoria" name="competenciaCategoria" required>
-
-      <label for="competenciaSubcategoria">Subcategoría:</label>
-      <input type="text" id="competenciaSubcategoria" name="competenciaSubcategoria" required>
+      <div>
+        <label>Tamaño de playeras disponibles</label>
+        <br>
+        <span id="tamPlayera"></span>
+        <fieldset>
+          <div id="tamPlayeraInput" class="edit-field-competencias">
+            
+          </div>
+        </fieldset>
+      </div>
 
       <label for="competenciaCosto">Costo:</label>
-      <input type="text" id="competenciaCosto" name="competenciaCosto" required>
+      <input class="edit-field-competencias" type="text" id="competenciaCosto" name="competenciaCosto" required>
 
       <label for="competenciaDDeposito">Datos para depositar:</label>
-      <input type="text" id="competenciaDDeposito" name="competenciaDDeposito" required>
+      <input class="edit-field-competencias" type="text" id="competenciaDDeposito" name="competenciaDDeposito" required>
 
-      <label for="competenciaCelular">Celular:</label>      
-      <input type="text" id="competenciaCelular" name="competenciaCelular"
+      <label for="competenciaCelular">Celular:</label>
+      <input class="edit-field-competencias" type="text" id="competenciaCelular" name="competenciaCelular"
         placeholder="Teléfono a 10 dígitos" pattern="\d{10}" maxlength="10"
         title="Debe contener exactamente 10 dígitos numéricos" required>
 
 
       <label for="competenciaCorreo">Correo:</label>
-      <input type="text" id="competenciaCorreo" name="competenciaCorreo" required>
+      <input class="edit-field-competencias" type="text" id="competenciaCorreo" name="competenciaCorreo" required>
 
       <label for="competenciaWeb">Página web:</label>
-      <input type="text" id="competenciaWeb" name="competenciaWeb" required>
+      <input class="edit-field-competencias" type="text" id="competenciaWeb" name="competenciaWeb" required>
 
       <div class="action-buttons">
         <button class="btnClic" id="salvarCompetencia">Guardar</button>
@@ -626,12 +612,12 @@
 
   <div id="toast" class="toast"></div>
 
-  <script src="utilidades.js"></script>
+  <script rutinas/utilidades.js"></script>
   <script src="postlogin.js"></script>
   <script src="secc_clubes.js"></script>
   <script src="secc_asociados.js"></script>
   <script src="secc_eventos.js"></script>
-  <script src="secc_comp.js"></script>  
+  <script src="secc_comp.js"></script>
 </body>
 
 </html>
