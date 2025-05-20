@@ -55,7 +55,7 @@ const estados = [
   "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
 ];
 
-const disciplinas = [
+const disciplinasArray = [
   "Alta Montaña",
   "Barranquismo",
   "Escalada Deportiva",
@@ -64,6 +64,32 @@ const disciplinas = [
   "Senderismo",
   "Vía Ferrata",
   "Escalada en hielo"
+];
+
+const ramaArray = [
+  "Varonil",
+  "Femenil",
+  "Mixto"
+];
+
+const categoriaArray = [
+  "Master",
+  "Absoluta",
+  "U21: Junior",
+  "U19: Youth A (YA) Juvenil A",
+  "U17: Youth B (YB) Juvenil B",
+  "U15: Youth C (YC) Juvenil C",
+  "U13: Youth D (YD)	Juvenil D",
+  "Infantil A",
+  "Infantil B",
+  "Infantil C"
+];
+
+const playeraArray = [
+  "Chica",
+  "Mediana",
+  "Grande",
+  "Extragrande"
 ];
 
 const tipoSangre = [
