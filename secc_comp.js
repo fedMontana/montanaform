@@ -7,7 +7,10 @@ const bsalvarCompetencia = $("salvarCompetencia");
 
 const competenciasSelect = $("competenciasSelect");
 
-function inicializarCompetencias() {  
+let datosCompetencia = {};
+
+function inicializarCompetencias() {
+  generarCheckboxesRama();
   cargaDatosSelectEV(competencias);
   validarArchivoImagen("fotoCompetenciaInput", "previewCompetencia");
   $("previewCompetencia").innerHTML = "";
@@ -21,20 +24,21 @@ function inicializarCompetencias() {
         console.log("Ocultar la ficha de competencias...");
         detallesCompetencias.style.display = "none";
         break;
-      case "Nueva competencia":
-        console.log("Nueva competencia...");
-        const competenciaSinDatos = creaObjetoVacio(fieldMappingCompetencia);
-        populateFormCompetencias(competenciaSinDatos);
+      case "Nueva competencia":              
+        datosCompetencia = {};
+        datosCompetencia = creaObjetoVacio(fieldMappingCompetencia);
+        populateFormCompetencias(datosCompetencia);
         detallesCompetencias.style.display = "block";
         modoEdicion = false;
         beliminarCompetencia.style.display = "none";
         break;
-      default:
-        // Si estamos acá se editará la información de los eventos.         
-        console.log("Acá se leerá y pondrá la información de los eventos ya registrados");
-        const selectedCompetencia = competencias.find(competencia => competencia["Nombre competencia"] === competenciasSelect.value);
-        populateFormCompetencias(selectedCompetencia);
-        nombreOriginal = selectedCompetencia["Nombre competencia"];
+      default:        
+        console.log("Acá se leerá y pondrá la información de los eventos ya registrados");        
+        datosCompetencia = {};
+        datosCompetencia = competencias.find(competencia => competencia["Nombre competencia"] === competenciasSelect.value);
+        populateFormCompetencias(datosCompetencia);
+        nombreOriginal = datosCompetencia["Nombre competencia"];
+        //
         detallesCompetencias.style.display = "block"; //
         modoEdicion = true;
         beliminarCompetencia.style.display = "block";
@@ -43,34 +47,118 @@ function inicializarCompetencias() {
     objCambios = {};
   });
 
+
+  function generarCheckboxesRama() {
+    const container = $('competenciaRamaInput');
+    container.innerHTML = '';
+
+    ramaArray.forEach(actividad => {
+      const etiqueta = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.name = 'lasRamas';
+      checkbox.value = actividad;
+
+      etiqueta.appendChild(checkbox);
+      etiqueta.appendChild(document.createTextNode(' ' + actividad));
+
+      container.appendChild(etiqueta);
+    });
+
+    const containerCategoria = $('compCategoriaInput');
+    containerCategoria.innerHTML = "";
+    categoriaArray.forEach(categoria => {
+      const etiqueta = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.name = 'lasCategorias';
+      checkbox.value = categoria;
+
+      etiqueta.appendChild(checkbox);
+      etiqueta.appendChild(document.createTextNode(' ' + categoria));
+      containerCategoria.appendChild(etiqueta);
+    });
+
+    const containerPlayera = $('tamPlayeraInput');
+    containerPlayera.innerHTML = "";
+    playeraArray.forEach(tamanio => {
+      const etiqueta = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.name = 'playeraSz';
+      checkbox.value = tamanio;
+      etiqueta.appendChild(checkbox);
+      etiqueta.appendChild(document.createTextNode(' ' + tamanio));
+      containerPlayera.appendChild(etiqueta);
+    })
+  }
+
+  document.querySelectorAll('.edit-field-competencias').forEach(field => {
+    field.addEventListener('input', () => {
+      const clave = field.id.toString().replace("Input", "");      
+      let esp = false;
+      switch (field.id) {
+        case "competenciaRamaInput":
+          comparaArrayCompetencia("lasRamas", "Rama", "competenciaRamaInput");
+          esp = true;
+          break;
+        case 'compCategoriaInput':
+          comparaArrayCompetencia("lasCategorias", "Categoría", "compCategoriaInput");
+          esp = true;
+          break;
+        case 'tamPlayeraInput':
+          comparaArrayCompetencia("playeraSz", "Playeras", "tamPlayeraInput");
+          esp = true;
+          break;
+        default:
+
+      }
+      if (esp) return;
+      // 
+      const valorAlmacenado = datosCompetencia[fieldMappingCompetencia[field.id]];
+      const valorActual = field.value;      
+      objCambios[field.id] = valorAlmacenado === valorActual ? false : true;
+    });
+  });
+
+
   bsalvarCompetencia.addEventListener("click", async () => {
-    if (!modoEdicion && !imagenProcesadaOK) {
-      //console.log("Si estamos en modo Nuevo evento y no hay imagen disponible");
+    if (!modoEdicion && !imagenProcesadaOK) {      
       mostrarToast("Por favor selecciona una imagen");
       return;
     }
+    const chkReq = compruebaCamposCompetencias();
+    if (!chkReq) return;
 
-    // Primero revisar si hay algo para enviar    
-    if (confirm(`¿Enviar la información?`)) {
-      deshabilitaBotonesPArteCompetencia();
-      const datos = camposHtmlAObjeto(fieldMappingCompetencia);
-      // condición ? expresiónSiVerdadero : expresiónSiFalso
-      datos["Imagen"] = imagenProcesadaOK ? base64Comprobante : "";
+    // Primero revisar si hay algo para enviar
+    const hayCambios = Object.values(objCambios).some(estado => estado);
+    if (hayCambios) {
+      // Ok, sí hay cambios, revisamos que no haya campos en blanco.
+      if (confirm(`¿Enviar la información?`)) {
+        deshabilitaBotonesPArteCompetencia();
+        const datos = camposHtmlAObjeto(fieldMappingCompetencia);
+        console.log("Datos sin...", datos);
+        datos["Categoría"] = leeCheckBoxes("lasCategorias");
+        datos["Rama"] = leeCheckBoxes("lasRamas");
+        datos["Playeras"] = leeCheckBoxes("playeraSz");
+        // condición ? expresiónSiVerdadero : expresiónSiFalso
+        datos["Imagen"] = imagenProcesadaOK ? base64Comprobante : "";
 
-      let destino = "NuevaCompetencia"; // presuponemos
-      if (modoEdicion) {
-        // Estamos en modo edición, en este modo se puede enviar o no una nueva imagen
-        destino = "EditarCompetencia";
-        // Es necesario enviar el nombre original de la competencia
-        datos["nombreOriginal"] = nombreOriginal;
+        let destino = "NuevaCompetencia"; // presuponemos
+        if (modoEdicion) {          
+          destino = "EditarCompetencia";          
+          datos["nombreOriginal"] = nombreOriginal;
+        }
+        const val = JSON.stringify({ destino, datos });
+        console.log(val);
+        const resp = await enviarPOST(val);
+        alert(resp.message);
+        modificarArrComp(resp.nuevaURLImg);
+        habilitaBotonesPArteCompet();
+        return;
       }
-      const val = JSON.stringify({ destino, datos });
-      console.log(val);
-      const resp = await enviarPOST(val);
-      alert(resp.message);
-      modificarArrComp(resp.nuevaURLImg);
-      habilitaBotonesPArteCompet();
-      return;
+    } else {
+      mostrarToast("No hay nada para guardar.");
     }
   });
 
@@ -85,13 +173,46 @@ function inicializarCompetencias() {
       const resp = await enviarPOST(val);
       alert(resp.message);
       if (resp.success) {
-        // Se eliminará la información de la competencia en el array principal
+        
         eliminarEventoCompe(competencias);
         cargaDatosSelectEV(competencias);
       }
       habilitaBotonesPArteCompet();
     }
   });
+}
+
+function compruebaCamposCompetencias() {
+  const prueba = $('divCompetencias');
+  const requeridos = prueba.querySelectorAll("[required]");
+  requeridos.forEach(campo => {
+    if (campo.value === "") {
+      console.log("Se tiene que completar un campo");
+      const msg = "El campo para " + fieldMappingCompetencia[campo.id] + " está en blanco.";
+      mostrarToast(msg);
+      return false;
+    }
+  });
+  
+  if (leeCheckBoxes("lasRamas") === "") {
+    mostrarToast("Por favor selecciona una rama.");
+    return false;
+  }
+  if (leeCheckBoxes("lasCategorias") === "") {
+    mostrarToast("Por favor selecciona una categoría.");
+    return false;
+  }
+  if (leeCheckBoxes("playeraSz") === "") {
+    mostrarToast("Por favor selecciona las playeras disponibles.");
+    return false;
+  }
+  return true;
+}
+
+function comparaArrayCompetencia(nombreCB, nombreCampo, entrada) {  
+  const lr = leeCheckBoxes(nombreCB);  
+  const actOrig = datosCompetencia[nombreCampo];  
+  objCambios[entrada] = comparaArrays(actOrig, lr) ? false : true;
 }
 
 function deshabilitaBotonesPArteCompetencia() {
@@ -105,29 +226,40 @@ function deshabilitaBotonesPArteCompetencia() {
   bCompetencias.disabled = true;
 }
 
-// Cuando el usuario modificó la información de la competencia se actualizará
-// el objeto "competencias" que es donde está almacenada a información.
 function modificarArrComp(nuevaImg) {
   // Buscar el objeto nombreOriginal en el array competen
   const competen = competencias.find(e => e["Nombre competencia"] === nombreOriginal);
   if (competen) {
     // competen[campo] = nuevoValor;
     Object.entries(fieldMappingCompetencia).forEach(([fieldId, config]) => {
-      if (fieldId === "competenciaImg") {
-        if (nuevaImg !== "")
-          competen["Imagen"] = nuevaImg;
-      } else {
-        const viewField = $(fieldId); // fieldId corresponde al nombre de los controles html
-        //console.log("Valor nuevo: ", viewField.value, "  Valor actual: ", competen[config]);
-        // Actualizamos el campo en el objeto
-        competen[config] = viewField.value;
+      switch (fieldId) {
+        case 'competenciaImg':
+          if (nuevaImg !== "")
+            competen["Imagen"] = nuevaImg;
+          break;
+        case 'competenciaRama':
+          console.log("las ramas");
+          competen["Rama"] = leeCheckBoxes("lasRamas");
+          break;
+        case 'competenciaCategoria':
+          console.log("las cate");
+          competen["Categoría"] = leeCheckBoxes("lasCategorias");
+          break;
+        case 'competenciaTamPlayera':
+          console.log("las playe");
+          competen["Playeras"] = leeCheckBoxes("playeraSz");
+          break;
+        default:
+          const viewField = $(fieldId);           
+          competen[config] = viewField.value;
       }
     });
-  } else {
-    // Se ha agregado una nueva competencia, se actualizará el array
-    // así como el <select>
+  } else {    
     const datos = camposHtmlAObjeto(fieldMappingCompetencia);
     datos["Imagen"] = (nuevaImg !== "") ? nuevaImg : "";
+    datos["Categoría"] = leeCheckBoxes("lasCategorias");
+    datos["Rama"] = leeCheckBoxes("lasRamas");
+    datos["Playeras"] = leeCheckBoxes("playeraSz");
     competencias.push(datos);
   }
   cargaDatosSelectEV(competencias);
@@ -143,28 +275,32 @@ function habilitaBotonesPArteCompet() {
   bClubes.disabled = false;
   bEventos.disabled = false;
   bCompetencias.disabled = false;
-  // Forzamos un cambio en el <select>
+  // Forzamos
   competenciasSelect.value = "Nueva competencia";
   competenciasSelect.dispatchEvent(new Event('change'));
 }
 
 
-
-function populateFormCompetencias(selectedCompetencia) {
-  //console.log("Examinando estructura evento: ", selectedCompetencia);  
+function populateFormCompetencias(selectedCompetencia) {  
   Object.entries(fieldMappingCompetencia).forEach(([fieldId, config]) => {
-    const viewField = $(fieldId); // fieldId corresponde al nombre de los controles html
-    //console.log("fieldId: ", fieldId, "   config: ", config);
+    const viewField = $(fieldId);     
     switch (fieldId) {
-      case "competenciaImg":
-        //console.log("Sí, acá va el poster: ", selectedCompetencia[config]);
+      case "competenciaImg":        
         imagenContenedor('previewCompetencia', "fotoCompetenciaInput", selectedCompetencia[config]);
         break;
       case "eventDuration":
         viewField.value = selectedCompetencia[config];
         break;
-      default:
-        //console.log("V: ", selectedCompetencia[config]);
+      case "competenciaCategoria":
+        seleccionarChkBoxes("lasCategorias", "Categoría");
+        break;
+      case "competenciaTamPlayera":        
+        seleccionarChkBoxes("playeraSz", "Playeras");
+        break;
+      case "competenciaRama":        
+        seleccionarChkBoxes("lasRamas", "Rama");
+        break;
+      default:        
         viewField.value = selectedCompetencia[config] || '';
     }
     nombreOriginal = "";
@@ -172,14 +308,13 @@ function populateFormCompetencias(selectedCompetencia) {
 }
 
 
-
-
-// function cargaDatosSlctEventos() {
-//   opcEventos = [];
-//   opcEventos[0] = "Nuevo evento"; //  
-//   eventos.forEach(nombre => {
-//     // fieldMappingEventos.eventName es lo mismo que 'Nombre del evento'
-//     opcEventos.push(nombre[fieldMappingEventos.eventName]);
-//   });
-//   generarOpcionesSelect("eventosSelect", opcEventos);
-// }
+function seleccionarChkBoxes(elNombre, elCampo) {  
+  const seleccion = datosCompetencia[elCampo].split(',').map(d => d.trim());  
+  const checkboxes = document.querySelectorAll(`input[name="${elNombre}"]`);  
+  checkboxes.forEach(checkbox => {    
+    checkbox.checked = false; // Primero limpiamos todo
+    if (seleccion.includes(checkbox.value)) {      
+      checkbox.checked = true;
+    }
+  });
+}
