@@ -21,7 +21,7 @@ function generarCheckboxes() {
   const container = $('disciplinasInput');
   container.innerHTML = ''; // Limpia si ya existen
 
-  disciplinas.forEach(actividad => {
+  disciplinasArray.forEach(actividad => {
     const etiqueta = document.createElement('label');
     //etiqueta.classList.add('checkbox-label'); // Añadimos clase para estilos
     const checkbox = document.createElement('input');
@@ -50,10 +50,7 @@ function inicializarValoresAsociados() {
   lbAsociados.innerHTML = "Asociados [" + asociados.length + "]:";
   // Select de clubes para cuando el usuario está en modo edición:
   generarOpcionesSelect("clubInput", losClubes);
-  /* ¿Por qué no se usa 'generarOpcionesSelect' para rellenar los clubes en 'clubSelect'?
-      Porque la primera opción REQUERIDA en el <select> es "Todos los asociados", pues cuando
-      el usuario selecciona esta opción en el <select> vinculado llamado 'userSelect' se
-      mostraran TODOS LOS ASOCIADOS recibidos. */
+  
   losClubes.forEach(club => {
     const option = document.createElement("option");
     option.value = club;
@@ -61,13 +58,6 @@ function inicializarValoresAsociados() {
     clubSelect.appendChild(option);
   });
 
-  /* El comboBox 'userSelect' de los asociados se le ingresan dos valores:
-      .value = curp  La CURP es única, con este valor diferenciamos al asociado seleccionado
-      .textcontent = Nombre mas apellido del asociado.
-    Ahora, a este comboBox se le actualizan estos valores en función
-    del ComboBox de los clubes.
-    Al momento de inicializar se rellenará este <select> con la información de
-    TODOS LOS ASOCIADOS. */
   asociados.forEach(usuario => {
     const option = document.createElement("option");
     option.value = usuario.CURP;
@@ -84,47 +74,30 @@ function inicializarValoresAsociados() {
 function listenerDeCambiosAsociados() {
   document.querySelectorAll('.edit-field-asociados').forEach(field => {
     field.addEventListener('input', (evento) => {
-      /* Crítico -clave-:
-       Se está escuchando a las entradas y todos estos controles tienen el sufijo 'Input' en su id
-       así que se eliminará este sufijo para poder encontrar la clave en el objeto fieldMapping
-       por ejemplo se recibe la escucha de 'apellidoPaternoInput' y al eliminar el sufijo tenemos
-       'apellidoPaterno', y con esta clave se buscará en el objeto fieldMapping, el cual en el
-       campo jsonKey contiene 'Apellido Paterno', siendo este valor el acceso al apellido paterno
-       en el JSON recibido */
+      
       const clave = field.id.toString().replace("Input", "");
-      //console.log("El elemento HTML que el usuario modificó es: ", field.id);
-
-      //console.log("Probando type: ", evento.target.type);
+            
       switch (field.id) {
         case 'disciplinasInput':
           // Nuevas actividades
           let actividadesSeleccionadas = leeDisciplinas();
           // Actividades originales.
-          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];
-          //console.log("Los valores previooos: ", actOrig);
-          // console.log("prueba salidaw: ", evento.target.value); (da como resultado el checkbox cliqueado)
-          //console.log("Actividades clickeadas: ", actividadesSeleccionadas);
+          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];          
 
           if (comparaArrays(actividadesSeleccionadas, actOrig)) {
             // Son iguales                        
             objCambios["disciplinasInput"] = false;
           } else {
             objCambios["disciplinasInput"] = true;
-          }
-          //console.log("Los cambios... ", JSON.stringify(objCambios)); 
+          }          
           return; // MXES10          
           break;
         case "fotoInput":
           objCambios["fotoInput"] = true;
           return;
           break;
-        case 'funcionInput':
-          //console.log("El valor recibido  para la función es: ", field.value);
-          // Cuando se modifica este campo también se modifica subfuncionInput
-          revisaSubfuncion(field.value, "");
-          // regresar al string
-          //objCambios["subfuncion"] = (field.value !== initialData["Subfunción"]);
-          //console.log("Original: [", initialData["Subfunción"], "]  ingresado: [", field.value, "]", "  Resultado: ", (field.value !== initialData[valor]));
+        case 'funcionInput':          
+          revisaSubfuncion(field.value, "");                            
           break;
         default:
           console.log("El control del cambio fue: ", field.id, "  y el values es: ", field.value);
@@ -132,12 +105,9 @@ function listenerDeCambiosAsociados() {
       const valor = fieldMapping[clave].jsonKey;
       objCambios[field.id] = (field.value !== initialData[valor]);
       console.log("Original: [", initialData[valor], "]  ingresado: [", field.value, "]", "  Resultado: ", (field.value !== initialData[valor]));
-      // condición ? expresiónSiVerdadero : expresiónSiFalso
-      // Cuando hay diferencia entre lo almacenado y editado equivale a un TRUE y cambia a  #ff9800
-      // por lo tanto si son iguales los valores, es FALSE y cambia a #ccc
+      
       field.style.borderColor = objCambios[field.id] ? '#ff9800' : '#ccc';
-      //console.log("Los cambios... ", JSON.stringify(objCambios));      
-      // Verificar si hay cambios pendientes
+      
       const hayCambios = Object.values(objCambios).some(estado => estado);
       console.log("Resultado de los cambios: ", hayCambios);
     });
@@ -222,31 +192,14 @@ function losListenersAsociados() {
       userDetails.style.display = "block";
       idUsuario = selectedUser.ID; // Guardamos en global la ID
       laCURP = selectedUser.CURP;
-      /* Agregamos la información a las "label" para visualizar */
-      //laID.textContent = "Ficha del asociado  " + selectedUser.ID;
-      //$("fichaID").textContent = "Ficha del asociado  " + selectedUser.ID;
-    } else {
-      // El usuario seleccionó en el <select> "Selecciona un asociado"
-      // de un asociado, lo cual lo vamos a interpretar
-      // como 
-      // Cuando el usuario selecciona en el comboBox de asociados la opción 
-      // se debe ocultar la ficha que está editando.
-      // acá se revisa si hay cambios.     
+    } else {      
       console.log("Ocultando ficha....");
       ocultarFichaAsociados();
     }
   });
 
-  /* ________________________________________________
-   Click Botón toggle Editar/Visualizar, cambia la perspectiva de span (lectura) a input y además
-   se visualizarán estos botones:
-    - Botón de Guardar
-    - Botón Cancelar
-    - Botón Eliminar
-  */
   btEditVerAso.addEventListener("click", () => {
     if (posiblesCambiosPendientes2()) {
-      //console.log("Seguimos en modo edición ya que hay cambios pendiente y el usuario quiere seguir editando.");
       return;
     }
     // Se oculta el control span, que es "label" donde se visualiza la información del formulario:
@@ -464,20 +417,12 @@ function habilitaBotonesAsociado() {
   btEliminarAso.disabled = false;
 }
 
-/* Esta función hace la pregunta: ¿Hay cambios pendientes?
-  Regresa:
-    True -> Mantenerse en la página
-    False -> Cambiar de club, de usuario o pestaña.
-  Los parámetros
- */
 function posiblesCambiosPendientes(control, valorAnterior) {
   const hayCambios = Object.values(objCambios).some(estado => estado);
   if (hayCambios) {
     // Mostrar cuadro de confirmación
     const confirmarCambio = confirm("¿Salir sin guardar?");
     if (!confirmarCambio) {
-      // False .- significa que el usuario precionó "Cancelar"
-      // Revertir el cambio si el usuario cancela
       console.log("El usuario quiere seguir editando sin salir.")
       control.value = valorAnterior; //      
       return true; // Salir sin cargar nuevo usuario
@@ -486,7 +431,7 @@ function posiblesCambiosPendientes(control, valorAnterior) {
       return false;
     }
   }
-  //console.log("No ha habido cambios.");
+
   return false;
 }
 
