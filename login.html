@@ -63,8 +63,7 @@
   </div>
 
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      // Eliminar un ítem específico
+    window.addEventListener('DOMContentLoaded', () => {      
       sessionStorage.removeItem('asociados');
       sessionStorage.removeItem('sessionToken');
       sessionStorage.removeItem('listaClubes');
@@ -78,11 +77,10 @@
 
     });
 
-    // Password:  o&CHuYPk
     document.getElementById('loginBtn').addEventListener('click', async () => {
       const boton = document.getElementById('loginBtn');
       boton.textContent = "Espere unos segundos por favor...";
-      boton.disabled = true; // Deshabilitar el botón
+      boton.disabled = true;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const message = document.getElementById('message');
@@ -101,20 +99,12 @@
           headers: {
             'Content-Type': 'text/plain;charset=utf-8'
           },
-          body: JSON.stringify({ destino, email, password }) // JSON.stringify() toma un objeto de JavaScript y lo transforma en una cadena JSON.
+          body: JSON.stringify({ destino, email, password })
         });
 
         const result = await response.json();
         console.log("Resultado: ", result.success)
-        if (result.success) {
-          console.log('Login exitoso. ¡Bienvenido!');
-          // Guardar el token de sesión y la información del usuario          
-
-          //console.log("El mensaje: ", result.message);
-          //console.log("El estado de la república es: ", result.estadoRep);
-          // Redirigir a otra página con la información.          
-          // Guardamos toda la información recibida pero antes la          
-          // convertimos los objetos a string para poder ser almacenados
+        if (result.success) {          
           sessionStorage.setItem('asociados', JSON.stringify(result.data));
           sessionStorage.setItem('sessionToken', JSON.stringify(result.token));
           sessionStorage.setItem('listaClubes', JSON.stringify(result.clubes));
@@ -123,9 +113,8 @@
           sessionStorage.setItem('elCorreo', email);
           sessionStorage.setItem('elEstado', result.estadoRep);
           sessionStorage.setItem('lasCompetencias', JSON.stringify(result.competencias));
-          //sessionStorage.setItem('lasCompetencias', JSON.stringify(result.competencias));
-          //console.log("Datos recibidos: ", JSON.stringify(result.competencias));
-          window.location.href = 'postlogin.html'; // Redirige a otra página.
+          
+          window.location.href = 'postlogin.html';
         } else {          
           message.textContent = result.message || 'Credenciales incorrectas.';
           message.style.display = 'block';
@@ -136,8 +125,7 @@
         console.error('Error:', error);
       }
     });
-  </script>
-  <!-- <script src="const.js"></script> -->
+  </script>  
   <script src="utilidades.js"></script>
 </body>
 
