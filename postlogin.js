@@ -1,18 +1,12 @@
-
 "use strict";
-/* Variables globales */
-let initialData = {}; // Almacena los datos originales, para asociados, eventos y competencias
-let objCambios = {};   // Objeto para rastrear cambios
+
+let initialData = {};
+let objCambios = {};
 
 var idUsuario = "";
 let idUsuarioEliminado = "";
 
 let token = "";
-//let nuevoEvento = {};
-
-// La estructura de los datos recibidos cuenta con dos listas
-// Para asociados y para eventos. El evento tiene un subgrupo que incluye
-//  celular, correo y página web
 
 let base64Comprobante = null;
 let imagenProcesadaOK = false;
@@ -36,10 +30,7 @@ let competencias;
 
 let laSecci0nPrevia = "";
 
-
-// Al cargar la página, generamos las opciones de los selects
-window.addEventListener('DOMContentLoaded', () => {
-  // Convierte el string a objeto para ser procesado
+window.addEventListener('DOMContentLoaded', () => {  
   asociados = JSON.parse(sessionStorage.getItem('asociados'));
   eventos = JSON.parse(sessionStorage.getItem('losEventos'));
   competencias = JSON.parse(sessionStorage.getItem('lasCompetencias'));
@@ -50,21 +41,10 @@ window.addEventListener('DOMContentLoaded', () => {
   elCorreo = sessionStorage.getItem('elCorreo');
   elEstado = sessionStorage.getItem('elEstado');
   nombreAsociacion = sessionStorage.getItem('laAsociacion');
-  
-  //  
 
-  console.log("Asociados recibidos: ", asociados);
-  // console.log("Número de asociados recibidos: ", asociados.length);
-  console.log("Clubes de la asociación: ", losClubes);
   elEstado = elEstado.replace(/^"|"$/g, '');
   elCorreo = elCorreo.replace(/^"|"$/g, '');
-  console.log("El estado es: ", elEstado);
-  console.log("La asociación: ", nombreAsociacion);
-  //console.log("El token de sesión es: ", elToken);
-  //console.log("El correo es: ", elCorreo);  
-  //console.log("El número de elementos en el mapa es: ", Object.keys(fieldMapping).length);
-  console.log("Los eventos: ", eventos);
-  console.log("Las competencias", competencias);
+  
   inicializarValoresAsociados();
 
   document.getElementById("fotoInput").value = "";
@@ -73,7 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
   inicializarCompetencias();
   inicializarClubes();
   //
-  _validarArchivoImagen("fotoInput", "previewImgAsociado");    
+  _validarArchivoImagen("fotoInput", "previewImgAsociado");
 });
 
 function _validarArchivoImagen(inputID, previewID) {
@@ -98,7 +78,7 @@ function _validarArchivoImagen(inputID, previewID) {
       base64Comprobante = await convertirArchivoABase64(archivo);
       imagenProcesadaOK = true;
       preview.innerHTML = "";
-      // Eliminar iframe de la imagen previa de Drive si existe
+      
       const contenedor = $('previewImgAsociado');
       const anterior = contenedor.querySelector("iframe");
       if (anterior) contenedor.removeChild(anterior);
@@ -116,17 +96,15 @@ function _validarArchivoImagen(inputID, previewID) {
   });
 }
 
-// Función para generar las opciones de un select a partir de un array
 function generarOpcionesSelect(selectId, opciones) {
   const selectElement = $(selectId);
   selectElement.innerHTML = "";
-  // Añadir una opción inicial vacía
+
   const opcionVacia = document.createElement("option");
   opcionVacia.value = "";
   opcionVacia.textContent = "Selecciona una opción";
   selectElement.appendChild(opcionVacia);
-
-  // Generar las opciones del menú
+  
   opciones.forEach(opcion => {
     const optionElement = document.createElement("option");
     optionElement.value = opcion;
@@ -135,18 +113,9 @@ function generarOpcionesSelect(selectId, opciones) {
   });
 }
 
-
-/* Con esta función se visualiza la section solicitada por el usuario
-*/
 function showContent(sectionId) {
-  const clk = $(sectionId);
-  //console.log("Se presionó el botón para ", sectionId);
-  //console.log("La sección previa es: ", laSecci0nPrevia);
-  // Primero se busca si tiene la clase "active".
-  if (!clk.matches('.active')) {
-    // Si no tiene la clase .active quiere decir que el usuario está
-    // solicitando cambiar de section. Pero antes verificamos si hay un
-    // cambio pendiente.
+  const clk = $(sectionId);  
+  if (!clk.matches('.active')) {    
     switch (laSecci0nPrevia) {
       case 'usuarios':
         if (posiblesCambiosSeccionAso()) {
@@ -154,27 +123,17 @@ function showContent(sectionId) {
           return;
         }
         break;
-    }
-    //console.log("La clase .active NO está activa");
-    console.log("Cambiar de sección, se activará: ", sectionId);
-    // Almacenamos la sección actual.
-    laSecci0nPrevia = sectionId;
-    // Cada 'section' tiene la class ".content" y este loop elimina
-    // la class "active" la cual en CSS está declarada para permitir
-    // la visualización de esa section.
+    }    
+    laSecci0nPrevia = sectionId;    
     document.querySelectorAll(".content").forEach(section => {
       section.classList.remove("active");
-    });
-    // Una vez ocultas todas las section, se activa la que se solicitó
+    });    
     document.getElementById(sectionId).classList.add("active");
-  } else {
-    // El usuario presionó el botón de la sección actual.
+  } else {    
     console.log("El usuario presionó el botón de la sección actual.");
   }
 }
 
-
-// body: JSON.stringify({destino: 'EliminarAsociado'})
 function enviarDatos(jsonData) {
 
   fetch(URL_ACTIVA,
@@ -187,7 +146,7 @@ function enviarDatos(jsonData) {
       if (!response.ok) {
         throw new Error('Error en la respuesta del servidor');
       }
-      return response.json(); // Convertir la respuesta a JSON
+      return response.json();
     })
     .then(data => {
       console.log("Datos recibidos: ", data);
@@ -219,4 +178,77 @@ async function enviarPOST(jsonData) {
     console.log("Error en la conexión al servidor...");
     console.error('Error:', error);
   }
+}
+
+function leeCheckBoxes(nombreGrupo) {
+  return Array.from(document.querySelectorAll(`input[name="${nombreGrupo}"]:checked`))
+    .map(checkbox => checkbox.value)
+    .join(', ');
+}
+
+function comparaArrays(arr1, arr2) {
+  if (arr1.length !== arr2.length) return false;
+  // Ordenamos y comparamos
+  const sorted1 = [...arr1].sort();
+  const sorted2 = [...arr2].sort();
+
+  return sorted1.every((val, index) => val === sorted2[index]);
+}
+
+function creaObjetoVacio(fieldMapping) {
+  let objVacio = {};
+  Object.entries(fieldMapping).forEach(([fieldId, config]) => {
+    objVacio[config] = "";
+  });
+  return objVacio;
+}
+
+function camposHtmlAObjeto(fieldMapping) {
+  const datos = {};  
+
+  Object.entries(fieldMapping).forEach(([idCampo, nombreHeader]) => {    
+    const valor = document.getElementById(idCampo)?.value || "";
+    datos[nombreHeader] = valor;
+  });  
+  datos["Usuario Organizador"] = elCorreo;
+  datos["Asociación Organizador"] = nombreAsociacion;
+
+  return datos;
+}
+
+function eliminarEventoCompe(arrayTarget) {
+  const keys = Object.keys(arrayTarget[0]);
+  let claveNombre = null;
+
+  if (keys.includes("Nombre del evento")) {
+    claveNombre = "Nombre del evento";
+  } else if (keys.includes("Nombre competencia")) {
+    claveNombre = "Nombre competencia";
+  } else {
+    console.log("No se encontró una clave válida");
+    return;
+  }
+
+  const arrayActualizado = arrayTarget.filter(loBuscado => loBuscado[claveNombre] !== nombreOriginal);
+  arrayTarget.length = 0;  // Se vacía el array original
+  arrayTarget.push(...arrayActualizado); // Se rellena con el nuevo contenido
+  console.log("Se ha eliminado el array satisfactoriamente.");
+}
+
+function cargaDatosSelectEV(arrayTarget) {
+  let valSelect = [];
+  const keys = Object.keys(arrayTarget[0]);
+  let claveNombre = "Nombre competencia";
+  valSelect[0] = "Nueva competencia"; // presuponemos
+  let idControl = "competenciasSelect";
+  if (keys.includes("Nombre del evento")) {
+    claveNombre = "Nombre del evento";
+    valSelect[0] = "Nuevo evento";
+    idControl = "eventosSelect";
+  }
+  // Empieza el relleno del <select>
+  arrayTarget.forEach(nombre => {
+    valSelect.push(nombre[claveNombre]);
+  });
+  generarOpcionesSelect(idControl, valSelect);
 }
