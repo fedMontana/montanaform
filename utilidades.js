@@ -1,6 +1,6 @@
-const URL_ACTIVA = "https://script.google.com/macros/s/AKfycbxhcqb_fvhmFVn6PzOgLVD3RpLPgydvdIya4ysK-snN_ptOB2_V21rETPEezoUpb6NQ/exec"; //prueba34
+const URL_ACTIVA = "https://script.google.com/macros/s/AKfycbzks3bUuH4wvtgJYrjhreY10X4XjtdbMq4B8A_aG22mBhvwwxLk1DqaPPS_RTOg20VnJQ/exec";
 
-const URL_ACTIVA0 = 'https://script.google.com/macros/s/AKfycbzHJYsvfYFgwn2YFd6j2fKSnsCUTWiiMcMe2uqEN9RZ6YzEWmqERKmlnkKc51NY773K/exec'; // prueba41 
+const URL_ACTIVA0 = 'https://script.google.com/macros/s/AKfycbzwdRMerXnK-6tRVAgh5wOz2Ah361rnamVMxx4YxJrRYS-zT34IxKWFhX-VZSzCpcfbWA/exec';
 
 //
 function $(id) {
