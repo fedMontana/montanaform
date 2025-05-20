@@ -139,7 +139,7 @@ function generarOpcionesSelect(selectId, opciones) {
 
 function generarCheckboxes() {
   const container = $('checkboxesContainer');
-  disciplinas.forEach(actividad => {
+  disciplinasArray.forEach(actividad => {
     const label = document.createElement('label');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
