@@ -11,19 +11,16 @@ const btRestValAso = $("restaurarValAsociadosBtn");
 const btEliminarAso = $("eliminarAsociadoBtn");
 const btEditVerAso = $("editButton");
 
-// Inicializar los selects para los asociados
-const clubSelect = $("clubSelect"); // Combobox Clubes
-const userSelect = $("userSelect"); // Comobox Asociados
-const userDetails = $("userDetails"); // Ficha del asociado
+const clubSelect = $("clubSelect");
+const userSelect = $("userSelect");
+const userDetails = $("userDetails");
 
-// Se generan los checkboxes para las Disciplinas.
 function generarCheckboxes() {
   const container = $('disciplinasInput');
-  container.innerHTML = ''; // Limpia si ya existen
+  container.innerHTML = '';
 
   disciplinasArray.forEach(actividad => {
-    const etiqueta = document.createElement('label');
-    //etiqueta.classList.add('checkbox-label'); // Añadimos clase para estilos
+    const etiqueta = document.createElement('label');    
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.name = 'actividad';
@@ -38,8 +35,7 @@ function generarCheckboxes() {
 
 /* 
 */
-function inicializarValoresAsociados() {
-  // Cargamos los valores constantes de los combobox
+function inicializarValoresAsociados() {  
   generarOpcionesSelect("generoInput", elGenero);
   generarOpcionesSelect("escolaridadInput", la_Escolaridad);
   generarOpcionesSelect("estadoInput", estados);
@@ -48,7 +44,7 @@ function inicializarValoresAsociados() {
   generarCheckboxes();
 
   lbAsociados.innerHTML = "Asociados [" + asociados.length + "]:";
-  // Select de clubes para cuando el usuario está en modo edición:
+  
   generarOpcionesSelect("clubInput", losClubes);
   
   losClubes.forEach(club => {
@@ -68,36 +64,31 @@ function inicializarValoresAsociados() {
   listenerDeCambiosAsociados();
 }
 
-/* ________________________________________________
-     Se determinan los cambios realizados en el formulario para asociados.
-     Si el cambio es un valor nuevo se deshabilitarán los cambios:  */
 function listenerDeCambiosAsociados() {
   document.querySelectorAll('.edit-field-asociados').forEach(field => {
     field.addEventListener('input', (evento) => {
-      
-      const clave = field.id.toString().replace("Input", "");
-            
+      const clave = field.id.toString().replace("Input", "");          
       switch (field.id) {
         case 'disciplinasInput':
-          // Nuevas actividades
+          
           let actividadesSeleccionadas = leeDisciplinas();
-          // Actividades originales.
+          
           const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];          
-
           if (comparaArrays(actividadesSeleccionadas, actOrig)) {
             // Son iguales                        
             objCambios["disciplinasInput"] = false;
           } else {
             objCambios["disciplinasInput"] = true;
           }          
-          return; // MXES10          
+          return;
           break;
         case "fotoInput":
           objCambios["fotoInput"] = true;
           return;
           break;
-        case 'funcionInput':          
-          revisaSubfuncion(field.value, "");                            
+        case 'funcionInput':
+          
+          revisaSubfuncion(field.value, "");                  
           break;
         default:
           console.log("El control del cambio fue: ", field.id, "  y el values es: ", field.value);
@@ -114,35 +105,23 @@ function listenerDeCambiosAsociados() {
   });
 }
 
-/* Comparamos los arrays de las disciplinas seleccionadas*/
-function comparaArrays(arr1, arr2) {
-  if (arr1.length !== arr2.length) return false;
-  // Ordenamos y comparamos
-  const sorted1 = [...arr1].sort();
-  const sorted2 = [...arr2].sort();
 
-  return sorted1.every((val, index) => val === sorted2[index]);
-}
 
 function leeDisciplinas() {
   const checkboxes = document.querySelectorAll('input[name="actividad"]:checked');
   const actividadesSeleccionadas = [];
   checkboxes.forEach(checkbox => {
-    // Agregamos las disciplinas seleccionadas a un array.
+  
     actividadesSeleccionadas.push(checkbox.value);
-    //console.log("->>  ---> ", checkbox.value);    
+  
   });
   const lasDisciplinas = actividadesSeleccionadas.join(', ');
-  //console.log("Las disciplinas seleccionadas: ", actividadesSeleccionadas);
+  
   return lasDisciplinas;
 }
 
 function losListenersAsociados() {
-  /* ________________________________________________
-  El usuario selecciona un club id="clubSelect" ocurre lo siguiente:
-   1. Revisa si ocurrieron cambios
-     1.. Si ocurrieron cambios
-  */
+  
   clubSelect.addEventListener("change", () => {
     if (posiblesCambiosPendientes(clubSelect, clubAnterior)) {
       console.log("Se ha cancelado, continúamos editando info del club ", clubSelect.value);
@@ -164,21 +143,16 @@ function losListenersAsociados() {
       userSelect.appendChild(option);
       contAso++;
     });
-    //console.log("El club: ", clubSelect.value + "  Núm: ", contAso);   
+    
     const msg = "Asociados [" + contAso + "]:";
     lbAsociados.innerHTML = msg;
   });
 
-  /* ________________________________________________
-    El usuario ha seleccionado un asociado. ¿Qué sigue?
-      1. Revisa si tenemos cambios pendientes.
-  */
   userSelect.addEventListener("change", () => {
     console.log("El click en el change es: ", userSelect.value);
-    //console.log("Usuario anterior: ", usuarioAnterior);
-    //console.log("El nuevo usuario: ", userSelect.value);
+    
     if (posiblesCambiosPendientes(userSelect, usuarioAnterior)) {
-      //userSelect.value = usuarioAnterior;
+      
       console.log("Se ha cancelado, continúamos editando info del usuario ", userSelect.value);
       mostrarToast("Continúamos editando información del asociado ", userSelect.value);
       return;
@@ -192,7 +166,8 @@ function losListenersAsociados() {
       userDetails.style.display = "block";
       idUsuario = selectedUser.ID; // Guardamos en global la ID
       laCURP = selectedUser.CURP;
-    } else {      
+    } else {
+     
       console.log("Ocultando ficha....");
       ocultarFichaAsociados();
     }
@@ -200,6 +175,7 @@ function losListenersAsociados() {
 
   btEditVerAso.addEventListener("click", () => {
     if (posiblesCambiosPendientes2()) {
+      //console.log("Seguimos en modo edición ya que hay cambios pendiente y el usuario quiere seguir editando.");
       return;
     }
     // Se oculta el control span, que es "label" donde se visualiza la información del formulario:
@@ -217,8 +193,6 @@ function losListenersAsociados() {
       el.style.display = el.style.display === 'block' ? 'none' : 'block';
     });
 
-    //editButton.textContent = editButton.textContent === 'Editar' ? 'Ver' : 'Editar';    
-    // Estos botones solo visibles cuando haya edición de asociado
     if (btEditVerAso.textContent === "Editar") {
       btEditVerAso.textContent = "Ver";
       btGuardarAsociados.style.display = "block";
@@ -232,18 +206,10 @@ function losListenersAsociados() {
     }
   });
 
-  /* ________________________________________________ 
-    Si es que se ha editado un campo, regresará los valores originales.
-  */
   btRestValAso.addEventListener("click", () => {
     posiblesCambiosSeccionAso();
   });
 
-
-  /*  ________________________________________________
- Clic Botón eliminar 
-  Buscará la id del usuario a eliminar en el JSON
-*/
   btEliminarAso.addEventListener("click", async () => {
     console.log("Eliminar usuario: " + idUsuario);
     const usuario = asociados.find(u => u.ID === idUsuario);
@@ -253,7 +219,7 @@ function losListenersAsociados() {
       console.log("El usuario ha confirmado la eliminación.");
       limpiaObjeAso();
       idUsuarioEliminado = idUsuario;
-      // JSON.stringify() toma un objeto de JavaScript y lo transforma en una cadena JSON.
+      
       const destino = "EliminarAsociado";
       const val = JSON.stringify({ destino, elToken, elEstado, idUsuario, });
       btEliminarAso.innerHTML = "Espera un momento por favor...";
@@ -261,12 +227,11 @@ function losListenersAsociados() {
       const resp = await enviarPOST(val);
       if (resp.success) {
         alert(resp.message);
-        // Filtramos el usuario a eliminar        
-        // Eliminamos solo al asociado en un array temporal
+        
         const usuarioAEliminar = asociados.filter(elBuscado => elBuscado["ID"] !== idUsuario);
         asociados.length = 0; // Vaciamos el array original
         asociados.push(...usuarioAEliminar);
-        // Forzamos un cambio en el <select>
+        
         clubSelect.value = "Todos los asociados";
         clubSelect.dispatchEvent(new Event('change'));
       }
@@ -324,8 +289,7 @@ function losListenersAsociados() {
       const datos = {};
       if (confirm(`¿Modificar información de ${nombreCompleto} (ID: ${idUsuario})?`)) {
         Object.entries(fieldMapping).forEach(([fieldId, config]) => {
-          //console.log("Nombre: ", fieldId);          
-          // Se obtiene el control de las entradas de datos:
+          
           switch (fieldId) {
             case 'fichaID':
               datos["ID"] = idUsuario;
@@ -340,7 +304,7 @@ function losListenersAsociados() {
               });
           }
         });
-        //console.log("Número de elementos: ", Object.keys(datos).length)
+        
         if (imagenProcesadaOK)
           datos["fotoModificada"] = base64Comprobante;
         const destino = "EditarAsociado";
@@ -350,10 +314,7 @@ function losListenersAsociados() {
         deshabilitaBotonesAsociado();
         const resp = await enviarPOST(val);
         if (resp.success) {
-          alert(resp.message);
-          console.log("Valor ingresado: ", resp.respuestaA);
-          // Despuésde que el cambio se haya aceptado en GAS procedemos a modificar aquellos
-          // campos en el JSON principal
+          alert(resp.message);          
           const selectedUser = asociados.find(user => user.CURP === usuarioAnterior);
           if (selectedUser) {
             console.log("Cambiar los valores en el JSON");
@@ -370,7 +331,7 @@ function losListenersAsociados() {
           }
           limpiaObjeAso();
         }
-        // Forzamos un cambio en el <select>        
+        
         btGuardarAsociados.innerHTML = "Guardar";
         habilitaBotonesAsociado();
         clubSelect.value = "Todos los asociados";
@@ -383,9 +344,7 @@ function losListenersAsociados() {
   });
 }
 
-// Ocultamos la ficha del asociado
-function ocultarFichaAsociados() {
-  //console.log("Ocultar fichas de asociados.");
+function ocultarFichaAsociados() {  
   initialData = {};
   objCambios = {};
   userDetails.style.display = "none"; // 
@@ -422,7 +381,7 @@ function posiblesCambiosPendientes(control, valorAnterior) {
   if (hayCambios) {
     // Mostrar cuadro de confirmación
     const confirmarCambio = confirm("¿Salir sin guardar?");
-    if (!confirmarCambio) {
+    if (!confirmarCambio) {      
       console.log("El usuario quiere seguir editando sin salir.")
       control.value = valorAnterior; //      
       return true; // Salir sin cargar nuevo usuario
@@ -430,8 +389,7 @@ function posiblesCambiosPendientes(control, valorAnterior) {
       limpiaObjeAso();
       return false;
     }
-  }
-
+  }  
   return false;
 }
 
@@ -439,9 +397,7 @@ function posiblesCambiosPendientes2() {
   const hayCambios = Object.values(objCambios).some(estado => estado);
   if (hayCambios) {
     const confirmarCambio = confirm("¿Perder cambios?");
-    if (!confirmarCambio) {
-      // False .- significa que el usuario presionó "Cancelar"
-      // o sea que quiere seguir editando.
+    if (!confirmarCambio) {      
       return true;
     } else {
       console.log("Limpiando...");
@@ -457,13 +413,10 @@ function posiblesCambiosSeccionAso() {
   const hayCambios = Object.values(objCambios).some(estado => estado);
   if (hayCambios) {
     const confirmarCambio = confirm("¿Perder cambios?");
-    if (!confirmarCambio) {
-      // False .- significa que el usuario presionó "Cancelar"
-      // o sea que quiere seguir editando.
+    if (!confirmarCambio) {      
       return true;
     } else {
-      limpiaObjeAso();
-      // Se restaura la información del asociado.
+      limpiaObjeAso();      
       const selecteAsociado = asociados.find(user => user.CURP === laCURP);
       populateForm(selecteAsociado);
     }
@@ -482,30 +435,21 @@ function limpiaObjeAso() {
   base64Comprobante = null;
 }
 
-
-// $("fichaID").textContent = "Ficha del asociado  " + selectedUser.ID;
-// fieldId - representa el nombre del arreglo, por ejemplo ID 'ID': {}
 function populateForm(selectedUser) {
-  Object.entries(fieldMapping).forEach(([fieldId, config]) => {
-    // Campo de visualización (span)
-    //console.log("El fieldID: ", fieldId); //<- el elemento span
+  Object.entries(fieldMapping).forEach(([fieldId, config]) => {    
     const viewField = $(fieldId);
 
     if (config.jsonKey === "ID") {
       viewField.textContent = "Asociado  [" + selectedUser[config.jsonKey] + "]";
-    } else {
-      //console.log("Esta es la llave: ", config.jsonKey);
+    } else {      
       viewField.textContent = selectedUser[config.jsonKey] || '';
     }
-
-    //console.log("La config.jsonkey: ", config.jsonKey)
+    
     switch (config.jsonKey) {
       case 'Subfunción':
         revisaSubfuncion(selectedUser["Función"], selectedUser[config.jsonKey]);
         break;
-      case 'Disciplinas':
-        //const disciplinasUsuario = selectedUser[config.jsonKey];        
-        //console.log("Las disciplinas seleccionadas", disciplinasSeleccionadas);
+      case 'Disciplinas':        
         const disciplinasSeleccionadas = selectedUser[config.jsonKey].split(',').map(d => d.trim());
         const checkboxes = document.querySelectorAll('#disciplinasInput input[type="checkbox"]');
         checkboxes.forEach(checkbox => {
@@ -536,10 +480,10 @@ function populateForm(selectedUser) {
       iframe.style.border = "none";
 
       const contenedor = $('previewImgAsociado');
-      // Eliminar iframe anterior si ya existe
+      
       const anterior = contenedor.querySelector("iframe");
       if (anterior) contenedor.removeChild(anterior);
-      // Eliminar img anterior si ya existe
+      
       const otraAnterior = contenedor.querySelector("img");
       if (otraAnterior) contenedor.removeChild(otraAnterior);
       contenedor.appendChild(iframe);
@@ -547,12 +491,7 @@ function populateForm(selectedUser) {
   }
 }
 
-/* Debido a que Función y Subfunción están relacionadas es necesario
-  determinar si la opción elegida en Función tiene un submenú. Por lo
-  que recibimos como parámetros la Función y el valor en Subfunción
-*/
-function revisaSubfuncion(funcion, valorSub) {
-  //console.log("Función recibida: ", funcion, "  Subfunción: ", valorSub);
+function revisaSubfuncion(funcion, valorSub) {  
   const sub = $('subfuncionInput');
   sub.innerHTML = "";
   sub.disabled = false;
@@ -570,9 +509,9 @@ function revisaSubfuncion(funcion, valorSub) {
     default:
       sub.disabled = true;
       return;
-  }
-  
+  }  
   generarOpcionesSelect("subfuncionInput", subMenu);
   if (valorSub !== "")
     sub.value = valorSub;
 }
+
