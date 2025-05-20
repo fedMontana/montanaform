@@ -1,26 +1,6 @@
+const URL_ACTIVA = "https://script.google.com/macros/s/AKfycbxhcqb_fvhmFVn6PzOgLVD3RpLPgydvdIya4ysK-snN_ptOB2_V21rETPEezoUpb6NQ/exec"; //prueba34
 
-/* GAS - Acceso-Login [Nombre del archivo: Acceso]
-   (doPOST)
-   - Envío de credenciales para acceso y si es exitoso devuelve los
-     datos de los asociados.
-   (doGet)
-  - Recupera la información de los eventos y competencias
- */
-const URL_ACTIVA = "https://script.google.com/macros/s/AKfycbyyWMRoakKorwGZIrOpRTl3x4F-YxJrzmS25cXbT6Bf3-pcSMEoMzekDY9mrOvAZGmY5A/exec"; //prueba33
-
-
-// GAS - (doGet) Acceso-Login. [Nombre de archivo: Acceso]
-//?????
-//const URL_DATOS = 'https://script.google.com/macros/s/AKfycby2ncpiLXY6vWg2hOQ4XGYCLcvcJnesYaYY6037eXDlxiKl3UT8o8BkbsZd4fAD59YZsA/exec';
-
-/* GAS - Ingreso-Datos. [Nombre de archivo: Asociados]
-  (doPOST)
-    - Envío de formulario
-    - Envío de contratación de seguro médico, eventos o de competencias
-  (doGET)
-    - Solicita el nombre de las asociaciones y sus respectivos clubes.
-*/
-const URL_ACTIVA0 = 'https://script.google.com/macros/s/AKfycbw7TX3aK6ddk7q8qqML4VF9DkDWoRebNIOY6bzQOVmAsb1gvsgljHyp08LkZQVOtTP-/exec'
+const URL_ACTIVA0 = 'https://script.google.com/macros/s/AKfycbzHJYsvfYFgwn2YFd6j2fKSnsCUTWiiMcMe2uqEN9RZ6YzEWmqERKmlnkKc51NY773K/exec'; // prueba41 
 
 //
 function $(id) {
@@ -79,7 +59,7 @@ const categoriaArray = [
   "U19: Youth A (YA) Juvenil A",
   "U17: Youth B (YB) Juvenil B",
   "U15: Youth C (YC) Juvenil C",
-  "U13: Youth D (YD)	Juvenil D",
+  "U13: Youth D (YD) Juvenil D",
   "Infantil A",
   "Infantil B",
   "Infantil C"
@@ -219,8 +199,6 @@ const fieldMapping = {
   }
 };
 
-/* A la izquierda van los nombres de los controles usados en el formulario
-y a la derecha el nombre del valor recibido del JSON.*/
 const fieldMappingEventos = {
   'eventName': 'Nombre del evento',
   'eventStart': 'Fecha Inicial',
@@ -235,9 +213,6 @@ const fieldMappingEventos = {
   'contactEmail': 'Informes correo',
   'contactLink': 'Informes link página',
 };
-// 'organizador': 'Usuario Organizador'
-// Falta la asociación y la foto
-
 
 const fieldMappingCompetencia = {
   "competenciaName": "Nombre competencia",
@@ -245,7 +220,7 @@ const fieldMappingCompetencia = {
   "competenciaLugar": "Lugar",
   "competenciaRama": "Rama",
   "competenciaCategoria": "Categoría",
-  "competenciaSubcategoria": "Sub-categoría",
+  "competenciaTamPlayera": "Playeras",
   "competenciaCosto": "Costo",
   "competenciaDDeposito": "Datos depósito",
   "competenciaImg":"Imagen",
@@ -253,20 +228,7 @@ const fieldMappingCompetencia = {
   "competenciaCorreo": "Correo",
   "competenciaWeb": "Página web",  
 };
-// Falta cartel
 
-
-
-
-/* Al momento de cargar una imagen se visualizará un preview
-   en <div id="imagePreview"></div> 
-Parámetros:
-  inputID  --> Control input, por ejemplo: <input type="file" id="fileInput" accept="image/jpeg,image/png">
-  previewID -> Control a previsualizar la image, ejemplo: <div id="imagePreview"></div>
-  --------
-Esta función además usa dos variables globales que deben ser declaradas:
-    base64Comprobante e imagenProcesadaOK
-*/
 function validarArchivoImagen(inputID, previewID) {
   const input = document.getElementById(inputID);
   const preview = document.getElementById(previewID);
@@ -308,12 +270,7 @@ function validarArchivoImagen(inputID, previewID) {
   });
 }
 
-/*
- * convertirArchivoABase64(archivo,  debug = false)
- *  – Admite JPG / PNG  (los PNG se convierten a JPG dentro del canvas)
- *  – Devuelve {base64, kb}  si debug === true
- *  – Devuelve solo base64     si debug === false
- */
+
 function convertirArchivoABase64(archivo, debug) {
   const LIMITE_KB = 250;            // cambia a tu gusto
   return new Promise((resolve, reject) => {
@@ -334,10 +291,7 @@ function convertirArchivoABase64(archivo, debug) {
           const ctx = cv.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
 
-          /* 🔍  Elegimos formato de salida:
-                 – Si era PNG ⇒ lo convertimos a JPEG para comprimir
-                 – Si era JPEG, sigue igual
-          */
+        
           const mimeSalida = 'image/jpeg';
           const base64 = cv.toDataURL(mimeSalida, calidad);   // calidad 0.4–0.9
           const kb = Math.round((base64.length * 3) / 4 / 1024);
@@ -372,33 +326,7 @@ function convertirArchivoABase64(archivo, debug) {
   });
 }
 
-/* PREVIO
-try {      
-      base64Comprobante = await convertirArchivoABase64(archivo);
-      imagenProcesadaOK = true;
-      //
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(archivo);
-      img.style.maxWidth = "100%";
-      img.style.border = "1px solid #666";
-      img.style.borderRadius = "6px";
-      img.style.marginTop = "10px";
-      preview.appendChild(img);
 
-    } catch (err) {
-      console.log("No se pudo procesar la imagen...");
-      mostrarToast("No se pudo procesar la imagen seleccionada.");
-    }
-
-*/
-
-/* archivo contiene:
-{ name: "4e5ad46ab811e06e767519a28276025f.jpg", 
- lastModified: 1640195345377, 
- webkitRelativePath: "", 
- size: 19981, 
- type: "image/jpeg" }
-*/
 function _convertirArchivoABase64(archivo) {
   console.log("Convirtiendo archivo");
   return new Promise((resolve, reject) => {
@@ -456,7 +384,6 @@ function _convertirArchivoABase64(archivo) {
     }
   });
 }
-
 
 function mostrarToast(mensaje, duracion = 3000) {
   const toast = $("toast");
