@@ -1,10 +1,7 @@
 
 window.addEventListener('DOMContentLoaded', () => {
   fetchDatosEventosYCompetencias();
-  document.getElementById("comprobanteSeguro").value = "";
-  //document.getElementById("comprobante").value = "";
-
-  validarArchivoImagen("comprobanteSeguro", "previewSeguro");  
+  
 });
 
 let base64Comprobante = null;
@@ -19,8 +16,7 @@ async function fetchDatosEventosYCompetencias() {
 
     if (data.success) {
       cargarFichas("eventos", data.eventos);
-      cargarFichas("competencias", data.competencias);
-      // ¡Oculta el loader!
+      cargarFichas("competencias", data.competencias);      
       document.getElementById("loader").style.display = "none";
     } else {
       console.error("Error del servidor:", data.message || "Sin mensaje");
@@ -40,7 +36,7 @@ function formatearFecha(fechaStr) {
 }
 
 function formatearMoneda(valor) {
-  if (isNaN(valor)) return valor; // si ya viene formateado
+  if (isNaN(valor)) return valor;
   return Number(valor).toLocaleString('es-MX', {
     style: 'currency',
     currency: 'MXN',
@@ -53,10 +49,10 @@ function cargarFichas(idContenedor, lista) {
   contenedor.innerHTML = '';
 
   lista.forEach((item, idx) => {
-    //console.log("Revisando la imagen a ver qué onda");
+    
     const esCompetencia = idContenedor === 'competencias';
     console.log("Revisando para dónde va ", esCompetencia);
-    /* ----  Cartel  (base64 o enlace Drive) ---- */
+    
     let cartelHTML = '';
     if (item.Imagen) {
       cartelHTML = item.Imagen.startsWith('data:image')
@@ -65,10 +61,24 @@ function cargarFichas(idContenedor, lista) {
                    width="100%" height="220" frameborder="0" loading="lazy"></iframe>`;
     }
 
-    /* ➜  Clave única para evitar colisiones */
     const key = `${idContenedor}-${idx}`;
-    console.log("A ver la famosa key ", key);
-    /* ----  Tarjeta  ---- */
+
+    let opcionesPlayera = '<option value="">Selecciona</option>';
+    if (esCompetencia && item.Playeras) {
+      const tallas = item.Playeras.split(',').map(t => t.trim());
+      opcionesPlayera += tallas.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+    let opcionesCategoria = '<option value="">Selecciona</option>';
+    if (esCompetencia && item.Categoria) {
+      const laCategoria = item.Categoria.split(',').map(t => t.trim());
+      opcionesCategoria += laCategoria.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+    let opcionesRama = '<option value="">Selecciona</option>';
+    if (esCompetencia && item.Rama) {
+      const laRama = item.Rama.split(',').map(t => t.trim());
+      opcionesRama += laRama.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -86,7 +96,7 @@ function cargarFichas(idContenedor, lista) {
       ${item.FechaLimite ? `<p><strong>Inscripción hasta:</strong> ${item.FechaLimite}</p>` : ''}
       ${item.DatosPago ? `<p><strong>Datos de pago:</strong> ${item.DatosPago}</p>` : ''}
       ${cartelHTML}
-
+      
       <button class="btn-registrar"
               onclick="mostrarFormulario('${key}')">Registrarme</button>
 
@@ -106,17 +116,23 @@ function cargarFichas(idContenedor, lista) {
           <!-- Campos extra SOLO para competencias -->
           <div class="extraComp" ${esCompetencia ? '' : 'style="display:none;"'}>
             <label>Estatura (cm):<input type="text" name="estatura" ${esCompetencia ? 'required' : ''}></label>
-            <label>Talla de playera:
-              <select name="talla" ${esCompetencia ? 'required' : ''}>
-                <option value="">Selecciona</option>
-                <option value="Chica">Chica</option>
-                <option value="Mediana">Mediana</option>
-                <option value="Grande">Grande</option>
-                <option value="Extragrande">Extragrande</option>
+            <label>Rama:
+              <select name="larama" ${esCompetencia ? 'required' : ''}>
+                ${opcionesRama}
               </select>
             </label>
+            <label>Categoría:
+              <select name="catego" ${esCompetencia ? 'required' : ''}>
+                ${opcionesCategoria}
+              </select>
+            </label>
+            <label>Talla de playera:
+              <select name="talla" ${esCompetencia ? 'required' : ''}>
+                ${opcionesPlayera}
+              </select>
+            </label>            
           </div>
-
+          <br>
           <button type="submit">Enviar registro</button>
         </form>
       </div>
@@ -129,22 +145,19 @@ function cargarFichas(idContenedor, lista) {
       </div>
     `;
 
-    /* Guardamos algunos metadatos en dataset para el envío */
     card.dataset.nombreEvento = item.Nombre;
     card.dataset.correoOrg = item.CorreoOrg || item.Correo || '';
     card.dataset.asociacionOrg = item.AsociacionOrg || '';
 
     contenedor.appendChild(card);
-
-    /* === Activamos validación de la imagen para este formulario === */
+    
     validarArchivoImagen(`comp-${key}`, `prev-${key}`);
-    /* === Listener de envío de este formulario específico === */
+    
     document.getElementById(`formRegistro-${key}`).addEventListener('submit', e => enviarRegistroInline(e, card));
 
   });
 }
 
-/* ============  Mostrar / ocultar el form de una ficha  ============ */
 function mostrarFormulario(key) {
   console.log("Nombre del formulario: ", key);
   const div = document.getElementById(`formContainer-${key}`);
@@ -155,7 +168,7 @@ function mostrarFormulario(key) {
   }, 100);
 }
 
-let tipoActual = "evento"; // o "competencia", lo definimos al abrirModal()
+let tipoActual = "evento";
 let nombreCompEvento = "";
 let correoOrganizador = "";
 let asociacionOrganizador = "";
@@ -164,16 +177,16 @@ let asociacionOrganizador = "";
 async function enviarRegistroInline(event, card) {
   event.preventDefault();
   const form = event.target;
-  const key  = form.dataset.key;            // ← “eventos-2” ó “competencias-0”
+  const key = form.dataset.key;
 
-  const tipo = form.dataset.tipo;               // evento | competencia
+  const tipo = form.dataset.tipo;
   const datos = new FormData(form);
-  /* Validamos imagen procesada */
+  
   if (!imagenProcesadaOK || !base64Comprobante) {
     mostrarToast('Selecciona una imagen válida antes de enviar.');
     return;
   }
-  /* Construimos payload */
+  
   const payload = {
     destino: tipo === 'evento' ? 'registroEvento' : 'registroCompetencia',
     nombreCompEvento: card.dataset.nombreEvento,
@@ -184,13 +197,15 @@ async function enviarRegistroInline(event, card) {
     emailUsuario: datos.get('email'),
     idParticipante: datos.get('id'),
     talla: tipo === 'competencia' ? datos.get('talla') : null,
+    categoria: tipo === 'competencia' ? datos.get('catego') : null,
+    rama: tipo === 'competencia' ? datos.get('larama') : null,
     estatura: tipo === 'competencia' ? datos.get('estatura') : null,
     comprobante: base64Comprobante
   };
-  /* Spinner simple */
+  
   form.querySelector('button').textContent = 'Enviando...';
   form.querySelector('button').disabled = true;
-  //console.log(JSON.stringify(payload));
+  
   try {
     const res = await fetch(URL_ACTIVA0, {
       method: 'POST',
@@ -203,11 +218,11 @@ async function enviarRegistroInline(event, card) {
       console.log("Respuesta exitosa");
       mostrarToast('¡Registro enviado correctamente!');
       form.reset();
-      //document.getElementById(`prev-${form.id.split('-')[1]}`).innerHTML = '';
+
       document.getElementById(`prev-${key}`).innerHTML = '';
-      base64Comprobante = null;  // limpiar globals
+      base64Comprobante = null;
       imagenProcesadaOK = false;
-      form.parentElement.style.display = 'none'; // ocultar nuevamente
+      form.parentElement.style.display = 'none';
     } else {
       alert('Error: ' + (resp.message || 'sin detalle'));
     }
@@ -225,76 +240,9 @@ function adaptarLinkDrive(link) {
   return match ? `https://drive.google.com/file/d/${match[0]}/preview` : '';
 }
 
-// Oculta spinner y reactiva botón
 function resetearFormulario() {
   document.getElementById("spinnerEnvio").style.display = "none";
   const btn = document.getElementById("enviarRegistro");
   btn.disabled = false;
   btn.textContent = "Enviar registro";
-}
-
-
-document.getElementById("formularioSeguro").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const btn = $("enviarSeguro");
-  const spinner = $("spinnerSeguro");
-  btn.disabled = true;
-  btn.textContent = "Enviando...";
-  spinner.style.display = "block";
-
-  const nombre = $("nombreSeguro").value.trim();
-  const id = $("idSeguro").value.trim();
-  const email = $("emailSeguro").value.trim();
-
-  if (!imagenProcesadaOK || !base64Comprobante) {
-    console.log("Por favor selecciona una imagen válida antes de enviar.");
-    mostrarToast("Por favor selecciona una imagen válida antes de enviar.");
-    resetearSeguro();
-    return;
-  }
-  if (!nombre || !id || !email) {
-    alert("Por favor completa todos los campos.");
-    resetearSeguro();
-    return;
-  }
-
-  try {
-    const payload = {
-      destino: "pagoSeguroMed",
-      nombre,
-      idParticipante: id,
-      emailUsuario: email,
-      comprobante: base64Comprobante
-    };
-
-    const res = await fetch(URL_ACTIVA0, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      const info = "El recibo de pago ha sido enviado correctamente. " + data.message;
-      console.log(info);
-      mostrarToast(info);
-      $("formularioSeguro").reset();
-    } else {
-      alert("Error al enviar: " + (data.message || "sin detalle"));
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Ocurrió un error inesperado.");
-  }
-  $('enviarSeguro').textContent = "Comprobante enviado";
-  $("enviarSeguro").disabled = true;
-  document.getElementById("comprobanteSeguro").value = "";
-  resetearSeguro();
-});
-
-function resetearSeguro() {
-  $("enviarSeguro").disabled = false;
-  $("enviarSeguro").textContent = "Enviar comprobante";
-  $("spinnerSeguro").style.display = "none";
 }
