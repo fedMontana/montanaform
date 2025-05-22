@@ -235,18 +235,16 @@ function eliminarEventoCompe(arrayTarget) {
   console.log("Se ha eliminado el array satisfactoriamente.");
 }
 
-function cargaDatosSelectEV(arrayTarget) {
-  let valSelect = [];
-  const keys = Object.keys(arrayTarget[0]);
+function cargaDatosSelectEV(arrayTarget, tipo) {
+  let valSelect = [];  
   let claveNombre = "Nombre competencia";
-  valSelect[0] = "Nueva competencia"; // presuponemos
   let idControl = "competenciasSelect";
-  if (keys.includes("Nombre del evento")) {
+  valSelect[0] = "Nueva competencia";
+  if (tipo === "competencias") {
     claveNombre = "Nombre del evento";
     valSelect[0] = "Nuevo evento";
     idControl = "eventosSelect";
   }
-  // Empieza el relleno del <select>
   arrayTarget.forEach(nombre => {
     valSelect.push(nombre[claveNombre]);
   });
