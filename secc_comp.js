@@ -11,7 +11,7 @@ let datosCompetencia = {};
 
 function inicializarCompetencias() {
   generarCheckboxesRama();
-  cargaDatosSelectEV(competencias);
+  cargaDatosSelectEV(competencias, "competencias");
   validarArchivoImagen("fotoCompetenciaInput", "previewCompetencia");
   $("previewCompetencia").innerHTML = "";
   document.getElementById("fotoCompetenciaInput").value = "";
@@ -175,7 +175,7 @@ function inicializarCompetencias() {
       if (resp.success) {
         
         eliminarEventoCompe(competencias);
-        cargaDatosSelectEV(competencias);
+        cargaDatosSelectEV(competencias, "competencias");
       }
       habilitaBotonesPArteCompet();
     }
@@ -262,7 +262,7 @@ function modificarArrComp(nuevaImg) {
     datos["Playeras"] = leeCheckBoxes("playeraSz");
     competencias.push(datos);
   }
-  cargaDatosSelectEV(competencias);
+  cargaDatosSelectEV(competencias, "competencias");
 }
 
 
