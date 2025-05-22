@@ -12,7 +12,7 @@ const eventosSelect = $("eventosSelect");
 const detallesEventos = $("eventosDetails");
 
 function inicializarEventos() {
-  cargaDatosSelectEV(eventos);  
+  cargaDatosSelectEV(eventos, "eventos");
   document.getElementById("fotoEventoInput").value = "";
   validarArchivoImagen("fotoEventoInput", "previewCompEvento");
   $('previewCompEvento').innerHTML = "";
@@ -92,7 +92,7 @@ function inicializarEventos() {
       if (resp.success) {
         // Se eliminará la información del evento del array principal        
         eliminarEventoCompe(eventos);
-        cargaDatosSelectEV(eventos);
+        cargaDatosSelectEV(eventos, "eventos");
       }
       habilitaBotonesPArteEvento();
     }
@@ -141,7 +141,7 @@ function modificarArr(nuevaImg) {
     datos["Imagen"] = (nuevaImg !== "") ? nuevaImg : "";
     eventos.push(datos);
   }
-  cargaDatosSelectEV(eventos);
+  cargaDatosSelectEV(eventos, "eventos");
 }
 
 
