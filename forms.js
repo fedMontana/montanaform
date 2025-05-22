@@ -9,8 +9,13 @@ let base64Comprobante = null;
 let imagenProcesadaOK = false;
 
 let estadosDisponibles = [];
-const estadosSet = new Set(estados); // convierte array a conjunto para comparación rápida
+const estadosSet = new Set(estados);
 
+let botonEnviar = $('btn-enviar');
+
+/* Fin de variables GLOBALES*/
+
+// Al cargar la página, generamos las opciones de los selects
 window.addEventListener('DOMContentLoaded', () => {
   fetchData();
   validarArchivoImagen("fileInput", "imagePreview");
@@ -20,10 +25,11 @@ window.addEventListener('DOMContentLoaded', () => {
   generarCheckboxes();
   generarOpcionesSelect("tipoSangre", tipoSangre);
   generarOpcionesSelect("funcion", funcion);
+  //   
 
 });
 
-
+// Función para enviar una solicitud GET
 async function fetchData() {
   try {
     const respuesta = await fetch(URL_ACTIVA0);
@@ -31,6 +37,8 @@ async function fetchData() {
       throw new Error(`Error en la solicitud: ${respuesta.status}`);
     }
     const datos = await respuesta.json();
+    console.log("Datos recibidos:", datos);
+    //console.log("Los datos recibidos: ", JSON.stringify(datos));
     mostrarToast("Datos recibidos.");
     llenarSelectAsociaciones(datos);
   } catch (error) {
@@ -46,7 +54,7 @@ function llenarSelectAsociaciones(losDatos) {
     let option = document.createElement("option");
     option.value = estado; // Usamos el nombre del estado como valor    
     if (estadosSet.has(estado)) {
-
+      
       const indice = estadosDisponibles.indexOf(estado);
       estadosDisponibles.splice(indice, 1);
     }
@@ -55,13 +63,13 @@ function llenarSelectAsociaciones(losDatos) {
   }
 
   let selectClubes = $("clubes");
- 
+  
   selectAsociaciones.addEventListener("change", function () {
     const seleccion = $("asociacion").value.trim().split(" - ")[0]; // extrae el nombre del estado
     const direccionFieldset = $("direccionINE");
     const selectEstado = $("estado");
     //console.log("El estado de la asociación es: [", seleccion, "]");
-    if (!seleccion) {      
+    if (!seleccion) {
       // Se tiene que borrar los campos de clubes      
       selectClubes.innerHTML = '<option value=""></option>';
       asociacionSelec = "";
@@ -73,13 +81,13 @@ function llenarSelectAsociaciones(losDatos) {
       direccionFieldset.style.display = "none";
       return;
     }
- 
+  
     CLi('municipio');
     CLi('codigo_postal');
-    direccionFieldset.style.display = "block";    
+    direccionFieldset.style.display = "block";
     asociacionSelec = losDatos[seleccion].asociacion;
-    const dire = $('laDirec');    
-  
+    const dire = $('laDirec');
+    //console.log("Probando la aso->; ", losDatos[seleccion].asociacion);
     if (estadosSet.has(seleccion)) {
       // Corresponde a un estado, bloquear y fijar estado      
       selectEstado.innerHTML = `<option value="${seleccion}">${seleccion}</option>`;
@@ -92,6 +100,7 @@ function llenarSelectAsociaciones(losDatos) {
       selectClubes.innerHTML = "";
       selectClubes.innerHTML = '<option value="Sin club">Sin club</option>';
       clubSelec = "Sin clubes";
+ 
       selectEstado.disabled = false;
       dire.innerText = "Dirección de tu INE";
       generarOpcionesSelect("estado", estadosDisponibles);
@@ -99,8 +108,8 @@ function llenarSelectAsociaciones(losDatos) {
   });
 }
 
+// Función para llenar el select de clubes
 function llenarSelectClubes(losDatos, estado) {
-  
   let selectClubes = $("clubes");
   selectClubes.innerHTML = '<option value="">Seleccione un club</option>'; // Limpiar antes de llenar    
   if (estado && losDatos[estado]) {
@@ -111,7 +120,7 @@ function llenarSelectClubes(losDatos, estado) {
       selectClubes.appendChild(option);
     });
   }
-  
+  // Acá escuchamos cuando el usuario seleccione un club
   selectClubes.addEventListener("change", function () {
     clubSelec = this.value;
     console.log("Club seleccionado: ", clubSelec);
@@ -123,12 +132,13 @@ function llenarSelectClubes(losDatos, estado) {
 function generarOpcionesSelect(selectId, opciones) {
   const selectElement = $(selectId);
   selectElement.innerHTML = "";
-  
+  // Añadir una opción inicial vacía
   const opcionVacia = document.createElement("option");
   opcionVacia.value = "";
   opcionVacia.textContent = "Selecciona una opción";
   selectElement.appendChild(opcionVacia);
-  
+
+  // Generar las opciones
   opciones.forEach(opcion => {
     const optionElement = document.createElement("option");
     optionElement.value = opcion;
@@ -137,6 +147,7 @@ function generarOpcionesSelect(selectId, opciones) {
   });
 }
 
+// Función para generar los checkboxes para las Disciplinas
 function generarCheckboxes() {
   const container = $('checkboxesContainer');
   disciplinasArray.forEach(actividad => {
@@ -229,6 +240,7 @@ function regresaDatosform() {
 }
 
 function enviarPost(jsonData) {
+  
   fetch(URL_ACTIVA0, {
     method: 'POST',
     body: jsonData,
@@ -238,25 +250,28 @@ function enviarPost(jsonData) {
       if (!response.ok) {
         throw new Error('Error en la respuesta del servidor');
       }
-      return response.json();
+      return response.json(); // Convertir la respuesta a JSON
     })
     .then(data => {
       console.log("Datos recibidos: ", data);
-
+      // Filtrar y procesar la respuesta
       if (data.success) {
-        console.log("Éxito:", data.message);
-        let _bt = $('btn-enviar');
-        _bt.textContent = "Registro recibido.";
-
+        console.log("Éxito:", data.message);        
+        botonEnviar.textContent = "Registro recibido.";
+        // Mostrar un mensaje al usuario        
         alert("Este es tu número de registro " + data.id + " enviado exitosamente.")
       } else {
         console.error("Error:", data.message);
-        mostrarToast("Error: " + data.message);
+        mostrarToast("Error: " + data.message); // Mostrar un mensaje de error al usuario
+        botonEnviar.textContent = "Enviar Registro";
+        botonEnviar.disabled = false;
       }
     })
     .catch(error => {
       console.error('Error al enviar el correo:', error);
       mostrarToast("Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.");
+      botonEnviar.textContent = "Enviar Registro";
+      botonEnviar.disabled = false;
     });
 }
 
@@ -269,9 +284,10 @@ function verificarCampos() {
   });
 
   let todosCompletos = true;
-  
+  // 1) Validación de disciplinas
   if (lasDisciplinas === "") {
-  
+    // Resaltamos el fieldset
+
     $('lasDisciplinas').classList.add('error');
     todosCompletos = false;
   }
@@ -279,7 +295,7 @@ function verificarCampos() {
   const requeridos = frm.querySelectorAll("[required]");
 
   requeridos.forEach(campo => {
-    
+    // Si es el teléfono, chequeamos 10 dígitos explícitamente
     if (campo.id === 'numTelefono' || campo.id === 'telefono_emergencia') {
       console.log("Revisando teléfonos....")
       const soloDigitos = campo.value.replace(/\D/g, '');
@@ -289,10 +305,10 @@ function verificarCampos() {
       }
     }
     else if (campo.id === "clubes") {
-    
+      // Cuando se llegue a clubes se debe verificar la asociación
       const cAs = GV('asociacion');
       if (cAs !== "-") {
-    
+        
         if (!campo.value.trim() || !campo.checkValidity()) {
           campo.classList.add('error');
           todosCompletos = false;
@@ -300,7 +316,7 @@ function verificarCampos() {
       }
     }
     else if (campo.id === "subfuncion") {
-    
+      
       const fn = GV('funcion');
       if (fn === 'Personal técnico' || fn === 'Consejo directivo' || fn === 'Servicio médico') {
       
@@ -314,7 +330,7 @@ function verificarCampos() {
     else if (!campo.value.trim() || !campo.checkValidity()) {
       campo.classList.add('error');
       todosCompletos = false;
-    
+      //alert("Por favor verifica los datos ingresados.");
     }
   });
   if (!todosCompletos) {
@@ -323,9 +339,7 @@ function verificarCampos() {
       return false;
     }
     if (!imagenProcesadaOK || !base64Comprobante) {
-      
-      mostrarToast("Por favor selecciona una imagen válida antes de enviar.");
-    
+      mostrarToast("Por favor selecciona una imagen válida antes de enviar.");      
       return;
     }
   }
@@ -338,12 +352,11 @@ function guardarDisciplina() {
   checkboxes.forEach(checkbox => {
     actividadesSeleccionadas.push(checkbox.value);
   });
-  lasDisciplinas = actividadesSeleccionadas.join(', ');
-  
+  lasDisciplinas = actividadesSeleccionadas.join(', ');  
 }
 
-document.querySelectorAll('#registroForm input, #registroForm select').forEach(el => {
-
+// Para todos los inputs y selects
+document.querySelectorAll('#registroForm input, #registroForm select').forEach(el => {  
   el.addEventListener('input', () => {
     if (el.id === 'subfuncion') {
       laSubFuncion = el.value;
@@ -352,7 +365,6 @@ document.querySelectorAll('#registroForm input, #registroForm select').forEach(e
     el.classList.remove('error');
   });
 });
-
 
 document.querySelectorAll('input[type="checkbox"][name="actividad"]').forEach(cb => {
   console.log("!!!!!!!!!!!");
@@ -365,12 +377,12 @@ function enviarFormulario() {
   const v1 = $('asociacion');
   const elValue = v1.value;
   const elTexto2 = v1.options[v1.selectedIndex].text;
-  
+  console.log("value: ", elValue);
+  console.log("innerText: ", elTexto2);
   if (verificarCampos()) {
-    console.log("Desactivamos el botón");
-    let _bt = $('btn-enviar');
-    _bt.textContent = "Espera unos segundos por favor...";
-    _bt.disabled = true; // Deshabilitar el botón
+    console.log("Desactivamos el botón");    
+    botonEnviar.textContent = "Espera unos segundos por favor...";
+    botonEnviar.disabled = true; // Deshabilitar el botón
     const jsonData = regresaDatosform();
     enviarPost(jsonData);
   } else {
