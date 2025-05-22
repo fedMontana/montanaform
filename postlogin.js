@@ -240,13 +240,14 @@ function cargaDatosSelectEV(arrayTarget, tipo) {
   let claveNombre = "Nombre competencia";
   let idControl = "competenciasSelect";
   valSelect[0] = "Nueva competencia";
-  if (tipo === "competencias") {
+  if (tipo === "eventos") {
     claveNombre = "Nombre del evento";
     valSelect[0] = "Nuevo evento";
     idControl = "eventosSelect";
-  }
+  }  
   arrayTarget.forEach(nombre => {
     valSelect.push(nombre[claveNombre]);
+    console.log("-----> ", nombre[claveNombre])
   });
   generarOpcionesSelect(idControl, valSelect);
 }
