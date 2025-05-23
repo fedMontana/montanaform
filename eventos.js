@@ -16,7 +16,8 @@ async function fetchDatosEventosYCompetencias() {
 
     if (data.success) {
       cargarFichas("eventos", data.eventos);
-      cargarFichas("competencias", data.competencias);      
+      cargarFichas("competencias", data.competencias);
+      // ¡Oculta el loader!
       document.getElementById("loader").style.display = "none";
     } else {
       console.error("Error del servidor:", data.message || "Sin mensaje");
@@ -36,7 +37,7 @@ function formatearFecha(fechaStr) {
 }
 
 function formatearMoneda(valor) {
-  if (isNaN(valor)) return valor;
+  if (isNaN(valor)) return valor; // si ya viene formateado
   return Number(valor).toLocaleString('es-MX', {
     style: 'currency',
     currency: 'MXN',
@@ -51,8 +52,7 @@ function cargarFichas(idContenedor, lista) {
   lista.forEach((item, idx) => {
     
     const esCompetencia = idContenedor === 'competencias';
-    console.log("Revisando para dónde va ", esCompetencia);
-    
+        
     let cartelHTML = '';
     if (item.Imagen) {
       cartelHTML = item.Imagen.startsWith('data:image')
@@ -60,8 +60,9 @@ function cargarFichas(idContenedor, lista) {
         : `<iframe src="${adaptarLinkDrive(item.Imagen)}"
                    width="100%" height="220" frameborder="0" loading="lazy"></iframe>`;
     }
-
+    
     const key = `${idContenedor}-${idx}`;
+        
 
     let opcionesPlayera = '<option value="">Selecciona</option>';
     if (esCompetencia && item.Playeras) {
@@ -106,6 +107,7 @@ function cargarFichas(idContenedor, lista) {
           <label>Nombre completo:<input type="text" name="nombre" required></label>
           <label>ID o CURP:<input type="text" name="id" required></label>
           <label>E-mail:<input type="email" name="email" required></label>
+          <label>Teléfono:<input type="text" name="rtelefono" placeholder="Teléfono a 10 dígitos" required maxlength="10"></label>
 
           <label>Comprobante de pago:
             <input type="file" name="comprobante"
@@ -173,7 +175,6 @@ let nombreCompEvento = "";
 let correoOrganizador = "";
 let asociacionOrganizador = "";
 
-/* ============  Envío AJAX del formulario inline  ============ */
 async function enviarRegistroInline(event, card) {
   event.preventDefault();
   const form = event.target;
@@ -195,6 +196,7 @@ async function enviarRegistroInline(event, card) {
 
     nombre: datos.get('nombre'),
     emailUsuario: datos.get('email'),
+    telefonoUsuario: datos.get('rtelefono'),
     idParticipante: datos.get('id'),
     talla: tipo === 'competencia' ? datos.get('talla') : null,
     categoria: tipo === 'competencia' ? datos.get('catego') : null,
@@ -202,10 +204,10 @@ async function enviarRegistroInline(event, card) {
     estatura: tipo === 'competencia' ? datos.get('estatura') : null,
     comprobante: base64Comprobante
   };
-  
+
   form.querySelector('button').textContent = 'Enviando...';
   form.querySelector('button').disabled = true;
-  
+
   try {
     const res = await fetch(URL_ACTIVA0, {
       method: 'POST',
@@ -220,9 +222,9 @@ async function enviarRegistroInline(event, card) {
       form.reset();
 
       document.getElementById(`prev-${key}`).innerHTML = '';
-      base64Comprobante = null;
+      base64Comprobante = null;  // limpiar globals
       imagenProcesadaOK = false;
-      form.parentElement.style.display = 'none';
+      form.parentElement.style.display = 'none'; // ocultar nuevamente
     } else {
       alert('Error: ' + (resp.message || 'sin detalle'));
     }
