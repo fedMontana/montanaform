@@ -1,6 +1,6 @@
 const URL_ACTIVA = "https://script.google.com/macros/s/AKfycbxPAw7cd622dAduxwx_mVwwnl9gEESZuW189Bk6lgTRYPCmcydtKN2oEXKn5NcS31mO4g/exec"; //accesoVer09c
 
-const URL_ACTIVA0 = 'https://script.google.com/macros/s/AKfycbyJNeJQXPIqHN5KPR4fFemte7A0DWNebCvtKuFd1OLQexoZTYuk69lL4pU-omY90yj_Wg/exec'; // form01c
+const URL_ACTIVA0 = 'https://script.google.com/macros/s/AKfycbxN78borfCk6X371qXAp41LyR9KorsW53Uk4VETfVfRq4AeH1yCBPcBTO3LAHItB6fMFg/exec'; // form01g
 
 //
 function $(id) {
