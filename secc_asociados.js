@@ -11,16 +11,17 @@ const btRestValAso = $("restaurarValAsociadosBtn");
 const btEliminarAso = $("eliminarAsociadoBtn");
 const btEditVerAso = $("editButton");
 
-const clubSelect = $("clubSelect");
-const userSelect = $("userSelect");
-const userDetails = $("userDetails");
+const clubSelect = $("clubSelect"); // Combobox Clubes
+const userSelect = $("userSelect"); // Comobox Asociados
+const userDetails = $("userDetails"); // Ficha del asociado
+
 
 function generarCheckboxes() {
   const container = $('disciplinasInput');
-  container.innerHTML = '';
+  container.innerHTML = ''; // Limpia si ya existen
 
   disciplinasArray.forEach(actividad => {
-    const etiqueta = document.createElement('label');    
+    const etiqueta = document.createElement('label');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.name = 'actividad';
@@ -33,6 +34,7 @@ function generarCheckboxes() {
   });
 }
 
+
 /* 
 */
 function inicializarValoresAsociados() {  
@@ -42,6 +44,7 @@ function inicializarValoresAsociados() {
   generarOpcionesSelect("tipoSangreInput", tipoSangre);
   generarOpcionesSelect("funcionInput", funcion);
   generarCheckboxes();
+  
 
   lbAsociados.innerHTML = "Asociados [" + asociados.length + "]:";
   
@@ -62,25 +65,27 @@ function inicializarValoresAsociados() {
   });
   losListenersAsociados();
   listenerDeCambiosAsociados();
+  modoVisualizaci0n();
 }
 
 function listenerDeCambiosAsociados() {
   document.querySelectorAll('.edit-field-asociados').forEach(field => {
     field.addEventListener('input', (evento) => {
-      const clave = field.id.toString().replace("Input", "");          
+      
+      const clave = field.id.toString().replace("Input", "");
+      
       switch (field.id) {
-        case 'disciplinasInput':
-          
+        case 'disciplinasInput':          
           let actividadesSeleccionadas = leeDisciplinas();
+          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];
           
-          const actOrig = initialData[fieldMapping["disciplinas"].jsonKey];          
           if (comparaArrays(actividadesSeleccionadas, actOrig)) {
             // Son iguales                        
             objCambios["disciplinasInput"] = false;
           } else {
             objCambios["disciplinasInput"] = true;
           }          
-          return;
+          return; // MXES10          
           break;
         case "fotoInput":
           objCambios["fotoInput"] = true;
@@ -88,7 +93,7 @@ function listenerDeCambiosAsociados() {
           break;
         case 'funcionInput':
           
-          revisaSubfuncion(field.value, "");                  
+          revisaSubfuncion(field.value, "");
           break;
         default:
           console.log("El control del cambio fue: ", field.id, "  y el values es: ", field.value);
@@ -97,8 +102,7 @@ function listenerDeCambiosAsociados() {
       objCambios[field.id] = (field.value !== initialData[valor]);
       console.log("Original: [", initialData[valor], "]  ingresado: [", field.value, "]", "  Resultado: ", (field.value !== initialData[valor]));
       
-      field.style.borderColor = objCambios[field.id] ? '#ff9800' : '#ccc';
-      
+      field.style.borderColor = objCambios[field.id] ? '#ff9800' : '#ccc';      
       const hayCambios = Object.values(objCambios).some(estado => estado);
       console.log("Resultado de los cambios: ", hayCambios);
     });
@@ -111,9 +115,8 @@ function leeDisciplinas() {
   const checkboxes = document.querySelectorAll('input[name="actividad"]:checked');
   const actividadesSeleccionadas = [];
   checkboxes.forEach(checkbox => {
-  
-    actividadesSeleccionadas.push(checkbox.value);
-  
+    
+    actividadesSeleccionadas.push(checkbox.value);  
   });
   const lasDisciplinas = actividadesSeleccionadas.join(', ');
   
@@ -143,7 +146,7 @@ function losListenersAsociados() {
       userSelect.appendChild(option);
       contAso++;
     });
-    
+
     const msg = "Asociados [" + contAso + "]:";
     lbAsociados.innerHTML = msg;
   });
@@ -151,9 +154,7 @@ function losListenersAsociados() {
   userSelect.addEventListener("change", () => {
     console.log("El click en el change es: ", userSelect.value);
     
-    if (posiblesCambiosPendientes(userSelect, usuarioAnterior)) {
-      
-      console.log("Se ha cancelado, continúamos editando info del usuario ", userSelect.value);
+    if (posiblesCambiosPendientes(userSelect, usuarioAnterior)) {    
       mostrarToast("Continúamos editando información del asociado ", userSelect.value);
       return;
     }
@@ -167,49 +168,24 @@ function losListenersAsociados() {
       idUsuario = selectedUser.ID; // Guardamos en global la ID
       laCURP = selectedUser.CURP;
     } else {
-     
+      
       console.log("Ocultando ficha....");
       ocultarFichaAsociados();
     }
   });
 
   btEditVerAso.addEventListener("click", () => {
-    if (posiblesCambiosPendientes2()) {
-      //console.log("Seguimos en modo edición ya que hay cambios pendiente y el usuario quiere seguir editando.");
+    if (posiblesCambiosPendientes2()) {      
       return;
     }
-    // Se oculta el control span, que es "label" donde se visualiza la información del formulario:
-    document.querySelectorAll("#userDetails span").forEach(el => {
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
-    // Y se muestran los controles de entrada:
-    document.querySelectorAll("#userDetails input").forEach(el => {
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
-    document.querySelectorAll("#userDetails select").forEach(el => {
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
-    document.querySelectorAll("#userDetails fieldset").forEach(el => {
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    });
-
-    if (btEditVerAso.textContent === "Editar") {
-      btEditVerAso.textContent = "Ver";
-      btGuardarAsociados.style.display = "block";
-      btRestValAso.style.display = "block";
-      btGenCredencial.style.display = "none";
-    } else {
-      btEditVerAso.textContent = "Editar";
-      btGuardarAsociados.style.display = "none";
-      btRestValAso.style.display = "none";
-      btGenCredencial.style.display = "block";
-    }
+    cambioDeVista();
   });
 
   btRestValAso.addEventListener("click", () => {
     posiblesCambiosSeccionAso();
   });
 
+  
   btEliminarAso.addEventListener("click", async () => {
     console.log("Eliminar usuario: " + idUsuario);
     const usuario = asociados.find(u => u.ID === idUsuario);
@@ -231,7 +207,7 @@ function losListenersAsociados() {
         const usuarioAEliminar = asociados.filter(elBuscado => elBuscado["ID"] !== idUsuario);
         asociados.length = 0; // Vaciamos el array original
         asociados.push(...usuarioAEliminar);
-        
+        // Forzamos un cambio en el <select>
         clubSelect.value = "Todos los asociados";
         clubSelect.dispatchEvent(new Event('change'));
       }
@@ -243,9 +219,6 @@ function losListenersAsociados() {
     }
   });
 
-  /*  ________________________________________________ 
-    Generar la credencial del asociado.
-  */
   btGenCredencial.addEventListener("click", async () => {
     // Primero se pide confirmación.
     const usuario = asociados.find(u => u.ID === idUsuario);
@@ -330,13 +303,13 @@ function losListenersAsociados() {
             }
           }
           limpiaObjeAso();
-        }
-        
+        }        
         btGuardarAsociados.innerHTML = "Guardar";
         habilitaBotonesAsociado();
         clubSelect.value = "Todos los asociados";
         clubSelect.dispatchEvent(new Event('change'));
-      }      
+        modoVisualizaci0n();
+      }
     }
     else {
       mostrarToast("Nada que guardar.");
@@ -381,7 +354,8 @@ function posiblesCambiosPendientes(control, valorAnterior) {
   if (hayCambios) {
     // Mostrar cuadro de confirmación
     const confirmarCambio = confirm("¿Salir sin guardar?");
-    if (!confirmarCambio) {      
+    if (!confirmarCambio) {
+      
       console.log("El usuario quiere seguir editando sin salir.")
       control.value = valorAnterior; //      
       return true; // Salir sin cargar nuevo usuario
@@ -389,7 +363,8 @@ function posiblesCambiosPendientes(control, valorAnterior) {
       limpiaObjeAso();
       return false;
     }
-  }  
+  }
+  
   return false;
 }
 
@@ -397,7 +372,8 @@ function posiblesCambiosPendientes2() {
   const hayCambios = Object.values(objCambios).some(estado => estado);
   if (hayCambios) {
     const confirmarCambio = confirm("¿Perder cambios?");
-    if (!confirmarCambio) {      
+    if (!confirmarCambio) {
+      
       return true;
     } else {
       console.log("Limpiando...");
@@ -413,10 +389,12 @@ function posiblesCambiosSeccionAso() {
   const hayCambios = Object.values(objCambios).some(estado => estado);
   if (hayCambios) {
     const confirmarCambio = confirm("¿Perder cambios?");
-    if (!confirmarCambio) {      
+    if (!confirmarCambio) {
+      
       return true;
     } else {
-      limpiaObjeAso();      
+      limpiaObjeAso();
+      // Se restaura la información del asociado.
       const selecteAsociado = asociados.find(user => user.CURP === laCURP);
       populateForm(selecteAsociado);
     }
@@ -435,13 +413,14 @@ function limpiaObjeAso() {
   base64Comprobante = null;
 }
 
+
 function populateForm(selectedUser) {
-  Object.entries(fieldMapping).forEach(([fieldId, config]) => {    
+  Object.entries(fieldMapping).forEach(([fieldId, config]) => {
     const viewField = $(fieldId);
 
     if (config.jsonKey === "ID") {
       viewField.textContent = "Asociado  [" + selectedUser[config.jsonKey] + "]";
-    } else {      
+    } else {
       viewField.textContent = selectedUser[config.jsonKey] || '';
     }
     
@@ -449,7 +428,8 @@ function populateForm(selectedUser) {
       case 'Subfunción':
         revisaSubfuncion(selectedUser["Función"], selectedUser[config.jsonKey]);
         break;
-      case 'Disciplinas':        
+      case 'Disciplinas':
+        
         const disciplinasSeleccionadas = selectedUser[config.jsonKey].split(',').map(d => d.trim());
         const checkboxes = document.querySelectorAll('#disciplinasInput input[type="checkbox"]');
         checkboxes.forEach(checkbox => {
@@ -468,7 +448,7 @@ function populateForm(selectedUser) {
         editField.value = selectedUser[config.jsonKey] || '';
     }
   });
-  // Por último la imagen
+  
   if (selectedUser["Foto"]) {
     const match = selectedUser["Foto"].match(/\/d\/([a-zA-Z0-9_-]+)\//);
     if (match && match[1]) {
@@ -491,7 +471,8 @@ function populateForm(selectedUser) {
   }
 }
 
-function revisaSubfuncion(funcion, valorSub) {  
+function revisaSubfuncion(funcion, valorSub) {
+  //console.log("Función recibida: ", funcion, "  Subfunción: ", valorSub);
   const sub = $('subfuncionInput');
   sub.innerHTML = "";
   sub.disabled = false;
@@ -513,5 +494,56 @@ function revisaSubfuncion(funcion, valorSub) {
   generarOpcionesSelect("subfuncionInput", subMenu);
   if (valorSub !== "")
     sub.value = valorSub;
+}
+
+function cambioDeVista() {
+  console.log("Cambio de vista.");
+  // Se oculta el control span, que es "label" donde se visualiza la información del formulario:
+  document.querySelectorAll("#userDetails span").forEach(el => {
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  });
+  // Y se muestran los controles de entrada:
+  document.querySelectorAll("#userDetails input").forEach(el => {
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  });
+  document.querySelectorAll("#userDetails select").forEach(el => {
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  });
+  document.querySelectorAll("#userDetails fieldset").forEach(el => {
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  });
+
+  if (btEditVerAso.textContent === "Editar") {
+    btEditVerAso.textContent = "Ver";
+    btGuardarAsociados.style.display = "block";
+    btRestValAso.style.display = "block";
+    btGenCredencial.style.display = "none";
+  } else {
+    btEditVerAso.textContent = "Editar";
+    btGuardarAsociados.style.display = "none";
+    btRestValAso.style.display = "none";
+    btGenCredencial.style.display = "block";
+  }
+}
+
+function modoVisualizaci0n() {
+  document.querySelectorAll("#userDetails span").forEach(el => {
+    el.style.display = 'block';
+  });
+  // Y se muestran los controles de entrada:
+  document.querySelectorAll("#userDetails input").forEach(el => {
+    el.style.display = 'none';
+  });
+  document.querySelectorAll("#userDetails select").forEach(el => {
+    el.style.display = 'none';
+  });
+  document.querySelectorAll("#userDetails fieldset").forEach(el => {
+    el.style.display = 'none';
+  });
+
+  btEditVerAso.textContent = "Editar";
+  btGuardarAsociados.style.display = "none";  // Botón guardar
+  btRestValAso.style.display = "none";  // Botón restaurar
+  btGenCredencial.style.display = "block";
 }
 
