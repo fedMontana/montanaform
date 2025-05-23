@@ -20,13 +20,14 @@
       padding: 24px;
     }
 
-   /* este sí */
+    /* este sí */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 20px;
     }
-/* este sí */
+
+    /* este sí */
     .card {
       background-color: #2c2c3e;
       border-radius: 10px;
@@ -46,7 +47,7 @@
       color: #00bfff;
     }
 
-    
+
     #formularioSeguro {
       display: flex;
       flex-direction: column;
@@ -120,15 +121,18 @@
 
 <body>
 
-  <div class="container">    
-    <div id="seguroMedico" class="cards-grid">      
+  <div class="container">
+    <div id="seguroMedico" class="cards-grid">
       <div class="card" style="max-width:500px; margin:auto;">
         <h2 style="color:#00bfff; margin-top:40px;">Contratación de seguro médico</h2>
         <form id="formularioSeguro">
           <label for="nombreSeguro">Nombre del asociado:</label>
           <input type="text" id="nombreSeguro" required>
 
-          <label for="idSeguro">ID o CURP:</label>
+          <label for="fechaNacimiento">Fecha de Nacimiento</label>
+          <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+
+          <label for="idSeguro">CURP:</label>
           <input type="text" id="idSeguro" required>
 
           <label for="emailSeguro">Correo electrónico:</label>
@@ -162,6 +166,31 @@
       validarArchivoImagen("comprobanteSeguro", "previewSeguro");
     });
 
+    
+    function formatearFechaConEdad(fechaStr) {
+      if (!fechaStr) return '';
+      
+      const [anioStr, mesStr, diaStr] = fechaStr.split('-');
+      const anio = parseInt(anioStr, 10);
+      const mes = parseInt(mesStr, 10) - 1; // 0-11
+      const dia = parseInt(diaStr, 10);
+      
+      const meses = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      ];
+      const nombreMes = meses[mes];
+
+      const hoy = new Date();
+      let edad = hoy.getFullYear() - anio;
+      
+      const cumpleEsteAno = new Date(hoy.getFullYear(), mes, dia);
+      if (hoy < cumpleEsteAno) {
+        edad--;
+      }      
+      return `${dia} de ${nombreMes} de ${anio} (${edad} ${edad === 1 ? 'año' : 'años'})`;
+    }
+    
     document.getElementById("formularioSeguro").addEventListener("submit", async e => {
       e.preventDefault();
 
@@ -174,7 +203,9 @@
       const nombre = $("nombreSeguro").value.trim();
       const id = $("idSeguro").value.trim();
       const email = $("emailSeguro").value.trim();
-
+      const fechaNaci = $('fechaNacimiento').value;
+      const fechaFor = formatearFechaConEdad(fechaNaci);      
+      
       if (!imagenProcesadaOK || !base64Comprobante) {
         console.log("Por favor selecciona una imagen válida antes de enviar.");
         mostrarToast("Por favor selecciona una imagen válida antes de enviar.");
@@ -188,18 +219,20 @@
       }
 
       try {
-        const payload = {
+        const datos = {
           destino: "pagoSeguroMed",
           nombre,
           idParticipante: id,
           emailUsuario: email,
+          fechaRaw: fechaNaci,
+          fechaFor: fechaFor,
           comprobante: base64Comprobante
         };
 
         const res = await fetch(URL_ACTIVA0, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(datos)
         });
 
         const data = await res.json();
