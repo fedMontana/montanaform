@@ -7,25 +7,21 @@ function $(id) {
   return document.getElementById(id);
 }
 
-// Get value
 function GV(id) {
   const x = document.getElementById(id);
   return x.value;
 }
 
-// Limpia la entrada
 function CLi(id) {
   const x = $(id);
   x.value = '';
 }
 
-// Regresamos el value de los elementos
 function VL(id) {
   const x = $(id).value;
   return x;
 }
 
-//
 const estados = [
   "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
   "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
@@ -106,8 +102,8 @@ const fieldMapping = {
     editType: 'text'
   },
   'nombre': {
-    jsonKey: 'Nombre',  // Nombre del par clave en el JSON recibido
-    editType: 'text' // input type="text"
+    jsonKey: 'Nombre',
+    editType: 'text'
   },
   'apellidoPaterno': {
     jsonKey: 'Apellido Paterno',
@@ -229,11 +225,70 @@ const fieldMappingCompetencia = {
   "competenciaWeb": "Página web",  
 };
 
+
+const HEADER_ORDER = [  
+  "CURP",
+  "Nombre",
+  "Apellido Paterno",
+  "Apellido Materno",
+  "Género",
+  "Función",
+  "Subfunción",
+  "Escolaridad",
+  "Estado",
+  "Municipio",
+  "Colonia",
+  "Calle y número",
+  "C.P.",
+  "Correo", 
+  "Teléfono",
+  "Fecha de nacimiento",
+  "Disciplinas",
+  "Tipo de sangre",
+  "Enfermedades",
+  "Alergias",  
+  "ID",
+  "Club",
+  "Asociación",           
+  "Contacto emergencia",
+  "Teléfono emergencia",          
+  "Foto"  
+];
+
+const HEADER_DEFAULTS = {
+  "CURP": true,
+  "Nombre": true,
+  "Apellido Paterno": true,
+  "Apellido Materno": true,
+  "Género": true,
+  "Función": true,
+  "Subfunción": true,
+  "Escolaridad": true,
+  "Estado": true,
+  "Municipio": true,
+  "Colonia,": true,
+  "Calle y número": true,
+  "C.P.": true,
+  "Correo": true, 
+  "Teléfono": true,
+  "Fecha de nacimiento": true,
+  "Disciplinas": true,
+  "Tipo de sangre": true,
+  "Enfermedades": true,
+  "Alergias": true,  
+  "ID": true,
+  "Club": true,
+  "Asociación": true,           
+  "Contacto emergencia": false,
+  "Teléfono emergencia": false,
+  "Foto": false
+};
+
+
 function validarArchivoImagen(inputID, previewID) {
   const input = document.getElementById(inputID);
   const preview = document.getElementById(previewID);
 
-  // Acá agregamos el listener para que cuando el usuario cargue una imagen se analice.
   input.addEventListener("change", async e => {
     console.log("Procesando imagen....");
     const archivo = e.target.files[0];
@@ -250,7 +305,7 @@ function validarArchivoImagen(inputID, previewID) {
       return;
     }    
     try {
-      /* Pedimos salida con peso incluido */
+
       const { base64, kb } = await convertirArchivoABase64(archivo, true);
       console.log(` Conversión final (${archivo.name}): ${kb} KB`);
       base64Comprobante = base64;
@@ -263,9 +318,9 @@ function validarArchivoImagen(inputID, previewID) {
       preview.appendChild(img);
 
     } catch (err) {
-      mostrarToast(err);      // mensaje claro al usuario
+      mostrarToast(err);
       console.warn(err);
-      input.value = '';       // reseteamos selección
+      input.value = '';
     }
   });
 }
