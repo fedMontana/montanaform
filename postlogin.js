@@ -42,6 +42,7 @@ window.addEventListener('DOMContentLoaded', () => {
   elEstado = sessionStorage.getItem('elEstado');
   nombreAsociacion = sessionStorage.getItem('laAsociacion');
 
+  
   elEstado = elEstado.replace(/^"|"$/g, '');
   elCorreo = elCorreo.replace(/^"|"$/g, '');
   
@@ -49,10 +50,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById("fotoInput").value = "";
   //   
+  inicializarClubes();
   inicializarEventos();
   inicializarCompetencias();
-  inicializarClubes();
-  //
+  generarCheckboxesRUD();
+  
   _validarArchivoImagen("fotoInput", "previewImgAsociado");
 });
 
@@ -90,28 +92,34 @@ function _validarArchivoImagen(inputID, previewID) {
       img.style.border = "none";
       preview.appendChild(img);
     } catch (err) {
-      console.log("No se pudo procesar la imagen...");
+      
       mostrarToast("No se pudo procesar la imagen seleccionada.");
     }
   });
 }
 
+
 function generarOpcionesSelect(selectId, opciones) {
   const selectElement = $(selectId);
   selectElement.innerHTML = "";
-
+  
   const opcionVacia = document.createElement("option");
   opcionVacia.value = "";
   opcionVacia.textContent = "Selecciona una opción";
   selectElement.appendChild(opcionVacia);
-  
-  opciones.forEach(opcion => {
-    const optionElement = document.createElement("option");
-    optionElement.value = opcion;
-    optionElement.textContent = opcion;
-    selectElement.appendChild(optionElement);
-  });
+
+
+  if (opciones.length !== 0) {
+    
+    opciones.forEach(opcion => {
+      const optionElement = document.createElement("option");
+      optionElement.value = opcion;
+      optionElement.textContent = opcion;
+      selectElement.appendChild(optionElement);
+    });
+  }
 }
+
 
 function showContent(sectionId) {
   const clk = $(sectionId);  
@@ -123,8 +131,10 @@ function showContent(sectionId) {
           return;
         }
         break;
-    }    
-    laSecci0nPrevia = sectionId;    
+    }
+        
+    laSecci0nPrevia = sectionId;
+    
     document.querySelectorAll(".content").forEach(section => {
       section.classList.remove("active");
     });    
@@ -146,7 +156,7 @@ function enviarDatos(jsonData) {
       if (!response.ok) {
         throw new Error('Error en la respuesta del servidor');
       }
-      return response.json();
+      return response.json(); // Convertir la respuesta a JSON
     })
     .then(data => {
       console.log("Datos recibidos: ", data);
@@ -171,11 +181,10 @@ async function enviarPOST(jsonData) {
     if (!result.success) {
       console.log("Respuesta de error recibida del servidor: ", result.message);
       alert(result.message);
-    } 
+    }
     // 
     return result;
-  } catch (error) {
-    console.log("Error en la conexión al servidor...");
+  } catch (error) {    
     console.error('Error:', error);
   }
 }
@@ -188,12 +197,13 @@ function leeCheckBoxes(nombreGrupo) {
 
 function comparaArrays(arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
-  // Ordenamos y comparamos
+
   const sorted1 = [...arr1].sort();
   const sorted2 = [...arr2].sort();
 
   return sorted1.every((val, index) => val === sorted2[index]);
 }
+
 
 function creaObjetoVacio(fieldMapping) {
   let objVacio = {};
@@ -205,11 +215,11 @@ function creaObjetoVacio(fieldMapping) {
 
 function camposHtmlAObjeto(fieldMapping) {
   const datos = {};  
-
   Object.entries(fieldMapping).forEach(([idCampo, nombreHeader]) => {    
     const valor = document.getElementById(idCampo)?.value || "";
     datos[nombreHeader] = valor;
-  });  
+  });
+  
   datos["Usuario Organizador"] = elCorreo;
   datos["Asociación Organizador"] = nombreAsociacion;
 
@@ -217,7 +227,7 @@ function camposHtmlAObjeto(fieldMapping) {
 }
 
 function eliminarEventoCompe(arrayTarget) {
-  const keys = Object.keys(arrayTarget[0]);
+  const keys = Object.keys(arrayTarget[0]);  
   let claveNombre = null;
 
   if (keys.includes("Nombre del evento")) {
@@ -236,7 +246,8 @@ function eliminarEventoCompe(arrayTarget) {
 }
 
 function cargaDatosSelectEV(arrayTarget, tipo) {
-  let valSelect = [];  
+  let valSelect = [];
+  
   let claveNombre = "Nombre competencia";
   let idControl = "competenciasSelect";
   valSelect[0] = "Nueva competencia";
@@ -244,10 +255,10 @@ function cargaDatosSelectEV(arrayTarget, tipo) {
     claveNombre = "Nombre del evento";
     valSelect[0] = "Nuevo evento";
     idControl = "eventosSelect";
-  }  
+  }
+  
   arrayTarget.forEach(nombre => {
-    valSelect.push(nombre[claveNombre]);
-    console.log("-----> ", nombre[claveNombre])
+    valSelect.push(nombre[claveNombre]);    
   });
   generarOpcionesSelect(idControl, valSelect);
 }
