@@ -1,3 +1,4 @@
+
 "use strict";
 
 let initialData = {};
@@ -7,7 +8,6 @@ var idUsuario = "";
 let idUsuarioEliminado = "";
 
 let token = "";
-
 let base64Comprobante = null;
 let imagenProcesadaOK = false;
 
@@ -30,7 +30,8 @@ let competencias;
 
 let laSecci0nPrevia = "";
 
-window.addEventListener('DOMContentLoaded', () => {  
+window.addEventListener('DOMContentLoaded', () => {
+  // Convierte el string a objeto para ser procesado
   asociados = JSON.parse(sessionStorage.getItem('asociados'));
   eventos = JSON.parse(sessionStorage.getItem('losEventos'));
   competencias = JSON.parse(sessionStorage.getItem('lasCompetencias'));
@@ -42,10 +43,15 @@ window.addEventListener('DOMContentLoaded', () => {
   elEstado = sessionStorage.getItem('elEstado');
   nombreAsociacion = sessionStorage.getItem('laAsociacion');
 
+  console.log("Asociados recibidos: ", asociados);
   
+  console.log("Clubes de la asociación: ", losClubes);
   elEstado = elEstado.replace(/^"|"$/g, '');
   elCorreo = elCorreo.replace(/^"|"$/g, '');
-  
+  console.log("El estado es: ", elEstado);
+  console.log("La asociación: ", nombreAsociacion);
+  console.log("Los eventos: ", eventos);
+  console.log("Las competencias", competencias);
   inicializarValoresAsociados();
 
   document.getElementById("fotoInput").value = "";
@@ -54,7 +60,7 @@ window.addEventListener('DOMContentLoaded', () => {
   inicializarEventos();
   inicializarCompetencias();
   generarCheckboxesRUD();
-  
+  //
   _validarArchivoImagen("fotoInput", "previewImgAsociado");
 });
 
@@ -63,24 +69,26 @@ function _validarArchivoImagen(inputID, previewID) {
   const preview = document.getElementById(previewID);
 
   input.addEventListener("change", async e => {
-    console.log("Procesando imagen....");
+
     const archivo = e.target.files[0];
+    console.log("el archivo: ", archivo);
     base64Comprobante = null;
     imagenProcesadaOK = false;
 
     if (!archivo) return;
 
     if (archivo.type === "image/bmp") {
+      console.log("Revisando")
       mostrarToast("Formato .bmp no permitido. Usa JPG o PNG");
       input.value = ""; // limpia el campo
       return;
-    }
-
+    }    
     try {
-      base64Comprobante = await convertirArchivoABase64(archivo);
+      console.log("Procesando la imagen....");
+      base64Comprobante = await convertirArchivoABase64(archivo, false);
       imagenProcesadaOK = true;
       preview.innerHTML = "";
-      
+      // Eliminar iframe de la imagen previa de Drive si existe
       const contenedor = $('previewImgAsociado');
       const anterior = contenedor.querySelector("iframe");
       if (anterior) contenedor.removeChild(anterior);
@@ -92,17 +100,16 @@ function _validarArchivoImagen(inputID, previewID) {
       img.style.border = "none";
       preview.appendChild(img);
     } catch (err) {
-      
+      console.log("No se pudo procesar la imagen...");
       mostrarToast("No se pudo procesar la imagen seleccionada.");
     }
   });
 }
 
-
 function generarOpcionesSelect(selectId, opciones) {
   const selectElement = $(selectId);
   selectElement.innerHTML = "";
-  
+
   const opcionVacia = document.createElement("option");
   opcionVacia.value = "";
   opcionVacia.textContent = "Selecciona una opción";
@@ -110,7 +117,7 @@ function generarOpcionesSelect(selectId, opciones) {
 
 
   if (opciones.length !== 0) {
-    
+
     opciones.forEach(opcion => {
       const optionElement = document.createElement("option");
       optionElement.value = opcion;
@@ -120,10 +127,11 @@ function generarOpcionesSelect(selectId, opciones) {
   }
 }
 
-
 function showContent(sectionId) {
-  const clk = $(sectionId);  
-  if (!clk.matches('.active')) {    
+  const clk = $(sectionId);
+  
+  if (!clk.matches('.active')) {
+    
     switch (laSecci0nPrevia) {
       case 'usuarios':
         if (posiblesCambiosSeccionAso()) {
@@ -132,14 +140,17 @@ function showContent(sectionId) {
         }
         break;
     }
-        
+    
+    console.log("Cambiar de sección, se activará: ", sectionId);    
     laSecci0nPrevia = sectionId;
     
     document.querySelectorAll(".content").forEach(section => {
       section.classList.remove("active");
-    });    
+    });
+    
     document.getElementById(sectionId).classList.add("active");
-  } else {    
+  } else {
+    // El usuario presionó el botón de la sección actual.
     console.log("El usuario presionó el botón de la sección actual.");
   }
 }
@@ -184,10 +195,12 @@ async function enviarPOST(jsonData) {
     }
     // 
     return result;
-  } catch (error) {    
+  } catch (error) {
+    console.log("Error en la conexión al servidor...");
     console.error('Error:', error);
   }
 }
+
 
 function leeCheckBoxes(nombreGrupo) {
   return Array.from(document.querySelectorAll(`input[name="${nombreGrupo}"]:checked`))
@@ -195,9 +208,10 @@ function leeCheckBoxes(nombreGrupo) {
     .join(', ');
 }
 
+/* Comparamos arrays de los checkboxes con la información original*/
 function comparaArrays(arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
-
+  // Ordenamos y comparamos
   const sorted1 = [...arr1].sort();
   const sorted2 = [...arr2].sort();
 
@@ -205,6 +219,8 @@ function comparaArrays(arr1, arr2) {
 }
 
 
+/* Función compartida
+*/
 function creaObjetoVacio(fieldMapping) {
   let objVacio = {};
   Object.entries(fieldMapping).forEach(([fieldId, config]) => {
@@ -213,9 +229,12 @@ function creaObjetoVacio(fieldMapping) {
   return objVacio;
 }
 
+
 function camposHtmlAObjeto(fieldMapping) {
-  const datos = {};  
-  Object.entries(fieldMapping).forEach(([idCampo, nombreHeader]) => {    
+  const datos = {};
+  
+  Object.entries(fieldMapping).forEach(([idCampo, nombreHeader]) => {
+  
     const valor = document.getElementById(idCampo)?.value || "";
     datos[nombreHeader] = valor;
   });
@@ -227,7 +246,8 @@ function camposHtmlAObjeto(fieldMapping) {
 }
 
 function eliminarEventoCompe(arrayTarget) {
-  const keys = Object.keys(arrayTarget[0]);  
+  const keys = Object.keys(arrayTarget[0]);
+  
   let claveNombre = null;
 
   if (keys.includes("Nombre del evento")) {
@@ -247,7 +267,7 @@ function eliminarEventoCompe(arrayTarget) {
 
 function cargaDatosSelectEV(arrayTarget, tipo) {
   let valSelect = [];
-  
+  // presuponemos competencias
   let claveNombre = "Nombre competencia";
   let idControl = "competenciasSelect";
   valSelect[0] = "Nueva competencia";
@@ -258,7 +278,7 @@ function cargaDatosSelectEV(arrayTarget, tipo) {
   }
   
   arrayTarget.forEach(nombre => {
-    valSelect.push(nombre[claveNombre]);    
+    valSelect.push(nombre[claveNombre]);
   });
   generarOpcionesSelect(idControl, valSelect);
 }
