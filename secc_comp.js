@@ -129,17 +129,16 @@ function inicializarCompetencias() {
 
 
   bsalvarCompetencia.addEventListener("click", async () => {
-    if (!modoEdicion && !imagenProcesadaOK) {
-      
+    if (!modoEdicion && !imagenProcesadaOK) {      
       mostrarToast("Por favor selecciona una imagen");
       return;
     }
     const chkReq = compruebaCamposCompetencias();
     if (!chkReq) return;
 
-    // Primero revisar si hay algo para enviar
+    // 
     const hayCambios = Object.values(objCambios).some(estado => estado);
-    if (hayCambios) {      
+    if (hayCambios || imagenProcesadaOK) {      
       if (confirm(`¿Enviar la información?`)) {
         deshabilitaBotonesPArteCompetencia();
         const datos = camposHtmlAObjeto(fieldMappingCompetencia);
