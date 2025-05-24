@@ -1,4 +1,3 @@
-
 "use strict";
 
 const detallesCompetencias = $("competenciasDetails");
@@ -24,7 +23,9 @@ function inicializarCompetencias() {
         console.log("Ocultar la ficha de competencias...");
         detallesCompetencias.style.display = "none";
         break;
-      case "Nueva competencia":              
+      case "Nueva competencia":
+        console.log("Nueva competencia...");
+        
         datosCompetencia = {};
         datosCompetencia = creaObjetoVacio(fieldMappingCompetencia);
         populateFormCompetencias(datosCompetencia);
@@ -32,8 +33,10 @@ function inicializarCompetencias() {
         modoEdicion = false;
         beliminarCompetencia.style.display = "none";
         break;
-      default:        
-        console.log("Acá se leerá y pondrá la información de los eventos ya registrados");        
+      default:
+        
+        console.log("Acá se leerá y pondrá la información de los eventos ya registrados");
+        
         datosCompetencia = {};
         datosCompetencia = competencias.find(competencia => competencia["Nombre competencia"] === competenciasSelect.value);
         populateFormCompetencias(datosCompetencia);
@@ -50,7 +53,7 @@ function inicializarCompetencias() {
 
   function generarCheckboxesRama() {
     const container = $('competenciaRamaInput');
-    container.innerHTML = '';
+    container.innerHTML = ''; // Limpia si ya existen
 
     ramaArray.forEach(actividad => {
       const etiqueta = document.createElement('label');
@@ -93,9 +96,11 @@ function inicializarCompetencias() {
     })
   }
 
+  
   document.querySelectorAll('.edit-field-competencias').forEach(field => {
     field.addEventListener('input', () => {
-      const clave = field.id.toString().replace("Input", "");      
+      const clave = field.id.toString().replace("Input", "");
+      
       let esp = false;
       switch (field.id) {
         case "competenciaRamaInput":
@@ -116,14 +121,16 @@ function inicializarCompetencias() {
       if (esp) return;
       // 
       const valorAlmacenado = datosCompetencia[fieldMappingCompetencia[field.id]];
-      const valorActual = field.value;      
+      const valorActual = field.value;
+      
       objCambios[field.id] = valorAlmacenado === valorActual ? false : true;
     });
   });
 
 
   bsalvarCompetencia.addEventListener("click", async () => {
-    if (!modoEdicion && !imagenProcesadaOK) {      
+    if (!modoEdicion && !imagenProcesadaOK) {
+      
       mostrarToast("Por favor selecciona una imagen");
       return;
     }
@@ -132,21 +139,21 @@ function inicializarCompetencias() {
 
     // Primero revisar si hay algo para enviar
     const hayCambios = Object.values(objCambios).some(estado => estado);
-    if (hayCambios) {
-      // Ok, sí hay cambios, revisamos que no haya campos en blanco.
+    if (hayCambios) {      
       if (confirm(`¿Enviar la información?`)) {
         deshabilitaBotonesPArteCompetencia();
         const datos = camposHtmlAObjeto(fieldMappingCompetencia);
         console.log("Datos sin...", datos);
         datos["Categoría"] = leeCheckBoxes("lasCategorias");
         datos["Rama"] = leeCheckBoxes("lasRamas");
-        datos["Playeras"] = leeCheckBoxes("playeraSz");
-        // condición ? expresiónSiVerdadero : expresiónSiFalso
+        datos["Playeras"] = leeCheckBoxes("playeraSz");        
         datos["Imagen"] = imagenProcesadaOK ? base64Comprobante : "";
 
         let destino = "NuevaCompetencia"; // presuponemos
-        if (modoEdicion) {          
-          destino = "EditarCompetencia";          
+        if (modoEdicion) {
+          
+          destino = "EditarCompetencia";
+          
           datos["nombreOriginal"] = nombreOriginal;
         }
         const val = JSON.stringify({ destino, datos });
@@ -173,7 +180,7 @@ function inicializarCompetencias() {
       const resp = await enviarPOST(val);
       alert(resp.message);
       if (resp.success) {
-        
+        // Se eliminará la información de la competencia en el array principal
         eliminarEventoCompe(competencias);
         cargaDatosSelectEV(competencias, "competencias");
       }
@@ -193,7 +200,7 @@ function compruebaCamposCompetencias() {
       return false;
     }
   });
-  
+  // Ahora vamos a comprobar que los checkboxes no estén vacíos.  
   if (leeCheckBoxes("lasRamas") === "") {
     mostrarToast("Por favor selecciona una rama.");
     return false;
@@ -209,9 +216,12 @@ function compruebaCamposCompetencias() {
   return true;
 }
 
-function comparaArrayCompetencia(nombreCB, nombreCampo, entrada) {  
-  const lr = leeCheckBoxes(nombreCB);  
-  const actOrig = datosCompetencia[nombreCampo];  
+function comparaArrayCompetencia(nombreCB, nombreCampo, entrada) {
+  
+  const lr = leeCheckBoxes(nombreCB);
+  
+  const actOrig = datosCompetencia[nombreCampo];
+  
   objCambios[entrada] = comparaArrays(actOrig, lr) ? false : true;
 }
 
@@ -250,11 +260,13 @@ function modificarArrComp(nuevaImg) {
           competen["Playeras"] = leeCheckBoxes("playeraSz");
           break;
         default:
-          const viewField = $(fieldId);           
+          const viewField = $(fieldId); // fieldId corresponde al nombre de los controles html
+          
           competen[config] = viewField.value;
       }
     });
-  } else {    
+  } else {
+    
     const datos = camposHtmlAObjeto(fieldMappingCompetencia);
     datos["Imagen"] = (nuevaImg !== "") ? nuevaImg : "";
     datos["Categoría"] = leeCheckBoxes("lasCategorias");
@@ -275,7 +287,7 @@ function habilitaBotonesPArteCompet() {
   bClubes.disabled = false;
   bEventos.disabled = false;
   bCompetencias.disabled = false;
-  // Forzamos
+  // Forzamos un cambio en el <select>
   competenciasSelect.value = "Nueva competencia";
   competenciasSelect.dispatchEvent(new Event('change'));
 }
@@ -283,9 +295,10 @@ function habilitaBotonesPArteCompet() {
 
 function populateFormCompetencias(selectedCompetencia) {  
   Object.entries(fieldMappingCompetencia).forEach(([fieldId, config]) => {
-    const viewField = $(fieldId);     
+    const viewField = $(fieldId); // fieldId corresponde al nombre de los controles html
+    
     switch (fieldId) {
-      case "competenciaImg":        
+      case "competenciaImg":    
         imagenContenedor('previewCompetencia', "fotoCompetenciaInput", selectedCompetencia[config]);
         break;
       case "eventDuration":
@@ -294,26 +307,33 @@ function populateFormCompetencias(selectedCompetencia) {
       case "competenciaCategoria":
         seleccionarChkBoxes("lasCategorias", "Categoría");
         break;
-      case "competenciaTamPlayera":        
+      case "competenciaTamPlayera":
+        
         seleccionarChkBoxes("playeraSz", "Playeras");
         break;
-      case "competenciaRama":        
+      case "competenciaRama":
+        
         seleccionarChkBoxes("lasRamas", "Rama");
         break;
-      default:        
+      default:
+        
         viewField.value = selectedCompetencia[config] || '';
     }
     nombreOriginal = "";
   });
 }
 
-
-function seleccionarChkBoxes(elNombre, elCampo) {  
-  const seleccion = datosCompetencia[elCampo].split(',').map(d => d.trim());  
-  const checkboxes = document.querySelectorAll(`input[name="${elNombre}"]`);  
-  checkboxes.forEach(checkbox => {    
+function seleccionarChkBoxes(elNombre, elCampo) {
+  // Convertimos a array el campo seleccionado
+  const seleccion = datosCompetencia[elCampo].split(',').map(d => d.trim());
+  // 
+  const checkboxes = document.querySelectorAll(`input[name="${elNombre}"]`);
+  
+  checkboxes.forEach(checkbox => {
+    
     checkbox.checked = false; // Primero limpiamos todo
-    if (seleccion.includes(checkbox.value)) {      
+    if (seleccion.includes(checkbox.value)) {
+      
       checkbox.checked = true;
     }
   });
