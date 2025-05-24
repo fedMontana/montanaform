@@ -54,7 +54,8 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       max-width: 700px;
       /* Ancho máximo para evitar que los campos excedan */
-      width: 95%;      
+      width: 95%;
+      /* Ajuste responsive */
     }
 
     .content.active {
@@ -81,7 +82,8 @@
       flex-direction: column;
       align-items: center;
     }
-    
+
+    /* El input de archivo ocupa todo el ancho de la foto */
     #fotoInput {
       margin-top: 8px;
       width: 100%;
@@ -213,6 +215,14 @@
       border-radius: 10px;
     }
 
+    /* #previewCompEvento img {
+      max-height: 200px;
+      width: auto;
+      display: block;
+      margin-top: 10px;
+      object-fit: contain;
+    } */
+
     .laPreviewComEvent img {
       max-height: 200px;
       width: auto;
@@ -268,7 +278,9 @@
     <button id="btnEventos" onclick="showContent('eventos')">Eventos</button>
     <button id="btnCompetencia" onclick="showContent('divCompetencias')">Competencias</button>
     <button id="btnRud" onclick="showContent('divRUD')">RUD</button>
-  </div>  
+  </div>
+  <!-- class="content" --- con esta clase se selecciona el elemento activo -->
+  <!-- Sección de usuarios -->
   <div id="usuarios" class="content">
     <h2>Gestión de Asociados</h2>
     <label for="clubSelect">Selección de clubes:</label>
@@ -581,13 +593,15 @@
 
       <label for="competenciStart">Fecha de inicio:</label>
       <input class="edit-field-competencias" type="date" id="competenciStart" name="competenciStart" required>
-      
+
+      <!-- <fieldset style="display: none;"> -->
       <div>
         <label>Rama</label>
         <br>
         <span id="competenciaRama"></span>
         <fieldset>
-          <div id="competenciaRamaInput" class="edit-field-competencias">            
+          <div id="competenciaRamaInput" class="edit-field-competencias">
+            <!-- Los checkboxes se generarán aquí dinámicamente -->
           </div>
         </fieldset>
       </div>
@@ -597,7 +611,8 @@
         <br>
         <span id="compCategoria"></span>
         <fieldset>
-          <div id="compCategoriaInput" class="edit-field-competencias">            
+          <div id="compCategoriaInput" class="edit-field-competencias">
+            <!-- Los checkboxes se generarán aquí dinámicamente -->
           </div>
         </fieldset>
       </div>
@@ -607,7 +622,8 @@
         <br>
         <span id="tamPlayera"></span>
         <fieldset>
-          <div id="tamPlayeraInput" class="edit-field-competencias">            
+          <div id="tamPlayeraInput" class="edit-field-competencias">
+            <!-- Los checkboxes se generarán aquí dinámicamente -->
           </div>
         </fieldset>
       </div>
@@ -644,7 +660,8 @@
       <label>Selecciona los campos requeridos:</label>
       <br>
       <fieldset>
-        <div id="chkDivRUD">          
+        <div id="chkDivRUD">
+          <!-- Los checkboxes se generarán aquí dinámicamente -->
         </div>
       </fieldset>
       <br>
