@@ -237,7 +237,7 @@ function losListenersAsociados() {
       datos["Foto"] = usuario["Foto"];
       datos["EstadoAsociacion"] = elEstado;
       datos["correo"] = elCorreo;
-      datos["club"] = usuario["Club"];
+      datos["Club"] = usuario["Club"];
       console.log(datos);
       const val = JSON.stringify({ destino, datos });
       console.log(val);
