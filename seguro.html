@@ -126,8 +126,14 @@
       <div class="card" style="max-width:500px; margin:auto;">
         <h2 style="color:#00bfff; margin-top:40px;">Contratación de seguro médico</h2>
         <form id="formularioSeguro">
-          <label for="nombreSeguro">Nombre del asociado:</label>
-          <input type="text" id="nombreSeguro" required>
+         <label for="nombreSeguro">Nombre:</label>
+          <input type="text" id="nombreSeguro" placeholder="Tu nombre" required>
+
+          <label for="paternoSeguro">Apellido paterno:</label>
+          <input type="text" id="paternoSeguro" placeholder="Apellido paterno" required>
+
+          <label for="maternoSeguro">Apellido materno:</label>
+          <input type="text" id="maternoSeguro" placeholder="Apellido materno" required>
 
           <label for="fechaNacimiento">Fecha de Nacimiento</label>
           <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
@@ -201,6 +207,8 @@
       spinner.style.display = "block";
 
       const nombre = $("nombreSeguro").value.trim();
+      const apellidoPaterno = $("paternoSeguro").value.trim();
+      const apellidoMaterno = $("maternoSeguro").value.trim();
       const id = $("idSeguro").value.trim();
       const email = $("emailSeguro").value.trim();
       const fechaNaci = $('fechaNacimiento').value;
@@ -212,16 +220,16 @@
         resetearSeguro();
         return;
       }
-      if (!nombre || !id || !email) {
+      if (!nombre || !apellidoPaterno || !apellidoMaterno || !id || !email) {
         alert("Por favor completa todos los campos.");
         resetearSeguro();
         return;
       }
-
+      const nombreCompleto = nombre + " " + apellidoPaterno + " " + apellidoMaterno;
       try {
         const datos = {
           destino: "pagoSeguroMed",
-          nombre,
+          nombreCompleto,
           idParticipante: id,
           emailUsuario: email,
           fechaRaw: fechaNaci,
