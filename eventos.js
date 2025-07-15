@@ -196,7 +196,9 @@ async function enviarRegistroInline(event, card) {
     correoOrganizador: card.dataset.correoOrg,
     asociacionOrg: card.dataset.asociacionOrg,
 
-    nombre: nombreCompleto,
+    nombre: datos.get('nombre').trim(),
+    apellidoPaterno: datos.get('apellidoPaterno').trim(),
+    apellidoMaterno: datos.get('apellidoMaterno').trim(),
     emailUsuario: datos.get('email'),
     telefonoUsuario: datos.get('rtelefono'),
     idParticipante: datos.get('id'),
