@@ -104,7 +104,9 @@ function cargarFichas(idContenedor, lista) {
       <!-- FORMULARIO INLINE OCULTO -->
       <div id="formContainer-${key}" class="form-inline" style="display:none;">
         <form id="formRegistro-${key}" data-key="${key}" data-tipo="${esCompetencia ? 'competencia' : 'evento'}">
-          <label>Nombre completo:<input type="text" name="nombre" required></label>
+          <label>Nombre:<input type="text" name="nombre" placeholder="Tu nombre" required></label>
+          <label>Apellido paterno:<input type="text" name="apellidoPaterno" placeholder="Tu apellido paterno" required></label>
+          <label>Apellido materno:<input type="text" name="apellidoMaterno" placeholder="Tu apellido materno" required></label>
           <label>ID o CURP:<input type="text" name="id" required></label>
           <label>E-mail:<input type="email" name="email" required></label>
           <label>Teléfono:<input type="text" name="rtelefono" placeholder="Teléfono a 10 dígitos" required maxlength="10"></label>
@@ -187,14 +189,14 @@ async function enviarRegistroInline(event, card) {
     mostrarToast('Selecciona una imagen válida antes de enviar.');
     return;
   }
-  
+  const nombreCompleto = datos.get('nombre') + " " + datos.get('apellidoPaterno') + " " + datos.get('apellidoMaterno');
   const payload = {
     destino: tipo === 'evento' ? 'registroEvento' : 'registroCompetencia',
     nombreCompEvento: card.dataset.nombreEvento,
     correoOrganizador: card.dataset.correoOrg,
     asociacionOrg: card.dataset.asociacionOrg,
 
-    nombre: datos.get('nombre'),
+    nombre: nombreCompleto,
     emailUsuario: datos.get('email'),
     telefonoUsuario: datos.get('rtelefono'),
     idParticipante: datos.get('id'),
