@@ -98,8 +98,13 @@ function llenarSelectAsociaciones(losDatos) {
       llenarSelectClubes(losDatos, seleccion);
     } else {
       selectClubes.innerHTML = "";
-      selectClubes.innerHTML = '<option value="Sin club">Sin club</option>';
-      clubSelec = "Sin clubes";
+      if(seleccion === "-"){
+        selectClubes.innerHTML = '<option value="Deportista independiente">Deportista independiente</option>';
+        clubSelec = "Deportista independiente";        
+      } else {
+        selectClubes.innerHTML = '<option value="Sin club">Sin club</option>';
+        clubSelec = "Sin clubes";
+      }
  
       selectEstado.disabled = false;
       dire.innerText = "Dirección de tu INE";
@@ -389,3 +394,4 @@ function enviarFormulario() {
     console.log("Datos incompletos");
   }
 }
+
