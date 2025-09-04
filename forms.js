@@ -98,7 +98,7 @@ function llenarSelectAsociaciones(losDatos) {
       llenarSelectClubes(losDatos, seleccion);
     } else {
       selectClubes.innerHTML = "";
-      if(seleccion === "-"){
+      if(seleccion === "Sin asociación"){
         selectClubes.innerHTML = '<option value="Deportista independiente">Deportista independiente</option>';
         clubSelec = "Deportista independiente";        
       } else {
@@ -394,4 +394,5 @@ function enviarFormulario() {
     console.log("Datos incompletos");
   }
 }
+
 
