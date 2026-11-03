@@ -1,4 +1,3 @@
-
 "use strict";
 
 let initialData = {};
@@ -30,80 +29,62 @@ let competencias;
 
 let laSecci0nPrevia = "";
 
-window.addEventListener('DOMContentLoaded', () => {
-  // Convierte el string a objeto para ser procesado
-  asociados = JSON.parse(sessionStorage.getItem('asociados'));
-  eventos = JSON.parse(sessionStorage.getItem('losEventos'));
-  competencias = JSON.parse(sessionStorage.getItem('lasCompetencias'));
+function leerDatoSesion(clave, valorInicial) {
+  const texto = sessionStorage.getItem(clave);
+  if (texto === null || texto === "") return valorInicial;
+  try { return JSON.parse(texto); } catch { return valorInicial; }
+}
 
-  losClubes = JSON.parse(sessionStorage.getItem('listaClubes'));
-  laAsociacion[0] = JSON.parse(sessionStorage.getItem('listaClubes'));
-  elToken = JSON.parse(sessionStorage.getItem('sessionToken'));
-  elCorreo = sessionStorage.getItem('elCorreo');
-  elEstado = sessionStorage.getItem('elEstado');
-  nombreAsociacion = sessionStorage.getItem('laAsociacion');
-
-  console.log("Asociados recibidos: ", asociados);
-  
-  console.log("Clubes de la asociación: ", losClubes);
+function inicializarSesionPortal() {
+  asociados = leerDatoSesion('asociados', []);
+  eventos = leerDatoSesion('losEventos', []);
+  competencias = leerDatoSesion('lasCompetencias', []);
+  losClubes = leerDatoSesion('listaClubes', []);
+  elToken = leerDatoSesion('sessionToken', '');
+  elCorreo = sessionStorage.getItem('elCorreo') || '';
+  elEstado = sessionStorage.getItem('elEstado') || '';
+  nombreAsociacion = leerDatoSesion('laAsociacion', '');
+  laAsociacion[0] = losClubes;
+  for (const lista of [asociados, eventos, competencias, losClubes]) {
+    if (!Array.isArray(lista)) throw new Error('La información de sesión no tiene el formato esperado. Inicia sesión nuevamente.');
+  }
   elEstado = elEstado.replace(/^"|"$/g, '');
   elCorreo = elCorreo.replace(/^"|"$/g, '');
-  console.log("El estado es: ", elEstado);
-  console.log("La asociación: ", nombreAsociacion);
-  console.log("Los eventos: ", eventos);
-  console.log("Las competencias", competencias);
-  inicializarValoresAsociados();
+}
 
-  document.getElementById("fotoInput").value = "";
-  //   
-  inicializarClubes();
-  inicializarEventos();
-  inicializarCompetencias();
-  generarCheckboxesRUD();
-  //
-  _validarArchivoImagen("fotoInput", "previewImgAsociado");
-});
 
 function _validarArchivoImagen(inputID, previewID) {
   const input = document.getElementById(inputID);
-  const preview = document.getElementById(previewID);
-
-  input.addEventListener("change", async e => {
-
+  input.addEventListener('change', async e => {
     const archivo = e.target.files[0];
-    console.log("el archivo: ", archivo);
-    base64Comprobante = null;
-    imagenProcesadaOK = false;
-
-    if (!archivo) return;
-
-    if (archivo.type === "image/bmp") {
-      console.log("Revisando")
-      mostrarToast("Formato .bmp no permitido. Usa JPG o PNG");
-      input.value = ""; // limpia el campo
-      return;
-    }    
-    try {
-      console.log("Procesando la imagen....");
-      base64Comprobante = await convertirArchivoABase64(archivo, false);
-      imagenProcesadaOK = true;
-      preview.innerHTML = "";
-      // Eliminar iframe de la imagen previa de Drive si existe
-      const contenedor = $('previewImgAsociado');
-      const anterior = contenedor.querySelector("iframe");
-      if (anterior) contenedor.removeChild(anterior);
-
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(archivo);
-      img.width = "150";
-      img.height = "150";
-      img.style.border = "none";
-      preview.appendChild(img);
-    } catch (err) {
-      console.log("No se pudo procesar la imagen...");
-      mostrarToast("No se pudo procesar la imagen seleccionada.");
+    const revision = ++fotoRevision;
+    imagenProcesadaOK = false; base64Comprobante = null; fotoProcesando = false;
+    if (!archivo) { mostrarFotoAsociado(); return; }
+    if (!['image/jpeg','image/png'].includes(archivo.type)) {
+      input.value = ''; mostrarFotoAsociado(); mostrarToast('Usa una imagen JPG o PNG.'); return;
     }
+    fotoProcesando = true;
+    try {
+      const resultado = await convertirArchivoABase64(archivo, false);
+      if (revision !== fotoRevision) return;
+      if (!resultado) throw new Error('No se pudo procesar la imagen.');
+      base64Comprobante = resultado; imagenProcesadaOK = true;
+      const img = document.createElement('img');
+      const url = URL.createObjectURL(archivo);
+      img.onload = img.onerror = () => URL.revokeObjectURL(url);
+      img.src = url; img.width = 112; img.height = 112; img.alt = 'Nueva fotografía del asociado';
+      document.getElementById(previewID).replaceChildren(img);
+    } catch (error) {
+      if (revision === fotoRevision) mostrarToast('No se pudo procesar la fotografía. Selecciona otra imagen.');
+    } finally { if (revision === fotoRevision) fotoProcesando = false; }
   });
+}
+
+// Preparado para un futuro botón de cierre de sesión; el portal recibido no lo incluye.
+async function cerrarSesionPortal() {
+  if (typeof permitirSalidaAsociados === 'function' && !await permitirSalidaAsociados()) return;
+  for (const clave of ['asociados','losEventos','lasCompetencias','listaClubes','sessionToken','elCorreo','elEstado','laAsociacion']) sessionStorage.removeItem(clave);
+  window.location.assign('login.html');
 }
 
 function generarOpcionesSelect(selectId, opciones) {
@@ -127,20 +108,19 @@ function generarOpcionesSelect(selectId, opciones) {
   }
 }
 
-function showContent(sectionId) {
+let navegacionPortalPendiente = false;
+async function showContent(sectionId) {
+  if (navegacionPortalPendiente) return;
   const clk = $(sectionId);
   
+  if (!clk) return;
   if (!clk.matches('.active')) {
     
-    switch (laSecci0nPrevia) {
-      case 'usuarios':
-        if (posiblesCambiosSeccionAso()) {
-          console.log("Seguir en la sección 'usuarios'.");
-          return;
-        }
-        break;
+    if (laSecci0nPrevia === 'usuarios' && typeof permitirSalidaAsociados === 'function') {
+      navegacionPortalPendiente = true;
+      try { if (!await permitirSalidaAsociados()) return; }
+      finally { navegacionPortalPendiente = false; }
     }
-    
     console.log("Cambiar de sección, se activará: ", sectionId);    
     laSecci0nPrevia = sectionId;
     
