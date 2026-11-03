@@ -2,18 +2,26 @@
 
 const btDescargar = $('descargarCSV');
 const containerRUD = $('chkDivRUD');
+let ordenCamposRUD = [];
+
+function obtenerOrdenRUD() {
+  if (typeof HEADER_ORDER !== 'undefined') return [...HEADER_ORDER];
+  // Si no se adjuntó el catálogo RUD, usar las columnas realmente recibidas.
+  return [...new Set(asociados.flatMap(asociado => Object.keys(asociado)))];
+}
 
 function generarCheckboxesRUD() {
 
   containerRUD.innerHTML = ''; // Limpia si ya existen
 
-  HEADER_ORDER.forEach(hdr => {
+  ordenCamposRUD = obtenerOrdenRUD();
+  ordenCamposRUD.forEach(hdr => {
     const etiqueta = document.createElement('label');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.name = 'headersRUD';
     checkbox.value = hdr;
-    checkbox.checked = HEADER_DEFAULTS.hasOwnProperty(hdr)
+    checkbox.checked = typeof HEADER_DEFAULTS !== 'undefined' && Object.prototype.hasOwnProperty.call(HEADER_DEFAULTS, hdr)
       ? HEADER_DEFAULTS[hdr]
       : true;
     etiqueta.appendChild(checkbox);
@@ -32,13 +40,14 @@ btDescargar.addEventListener("click", () => {
   checkboxes.forEach(checkbox => {        
     headersRequeridos.push(checkbox.value);
   });  
-  const nombreArchivo = "asociados_" + elEstado;
+  if (!headersRequeridos.length) return mostrarToast('Selecciona al menos un campo.');
+  const nombreArchivo = "asociados_" + elEstado + '.csv';
   exportarCSV(headersRequeridos, nombreArchivo);
 });
 
 
 function exportarCSV(headersRequeridos, nombreArchivo) {  
-  const headers = HEADER_ORDER.filter(h => headersRequeridos.includes(h));
+  const headers = ordenCamposRUD.filter(h => headersRequeridos.includes(h));
   const filas = [headers];
   asociados.forEach(obj => {    
     const fila = headers.map(key => {      
@@ -59,4 +68,5 @@ function exportarCSV(headersRequeridos, nombreArchivo) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
