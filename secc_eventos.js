@@ -1,6 +1,5 @@
 "use strict";
 
-
 let nombreOriginal = "";
 let modoEdicion = false;
 let opcEventos = [];
